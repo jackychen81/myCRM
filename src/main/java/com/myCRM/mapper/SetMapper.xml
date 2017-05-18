@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.SetMapper">
+
+	<select id="list" resultMap="Set">
+		select 
+		set_id,set_name,createby,createdate,updateby,updatedate,status,price,iscoupon,startfrom,expireto
+		from set
+	</select>
+	
+	<insert id="add" parameterType="com.myCRM.po.Set">
+		insert into set (set_name,createby,createdate,updateby,updatedate,
+		status,iscoupon,price,startfrom,expireto)values
+		(#{name,jdbcType=VARCHAR},
+		 #{createBy,jdbcType=VARCHAR},
+		 #{createDate,jdbcType=DATE},
+		 #{updateBy,jdbcType=VARCHAR},
+		 #{updateDate,jdbcType=DATE},
+		 #{status,jdbcType=INTEGER},
+		 #{iscoupon,jdbcType=INTEGER},
+		 #{price,jdbcType=DOUBLE},
+		 #{startFrom,jdbcType=DATE},
+		 #{expireTo,jdbcType=DATE}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from set where set_id=#{setId}
+	</delete>
+	
+	<update id="update" parameterType="com.myCRM.po.Set">
+		update set 
+		<set>
+			<if test="name!=null">
+				set_name = #{name},
+			</if>
+			<if test="updateBy!=null">
+				updateby = #{updateBy},
+			</if>
+			<if test="updateDate!=null">
+				updatedate = #{updateDate},
+			</if>
+			<if test="status!=null">
+				status = #{status},
+			</if>
+			<if test="iscoupon!=null">
+				iscoupon = #{iscoupon},
+			</if>
+			<if test="price!=null">
+				price = #{price},
+			</if>
+			<if test="startFrom!=null">
+				startfrom = #{startFrom},
+			</if>
+			<if test="expireTo!=null">
+				expireto = #{expireTo},
+			</if>
+		</set>
+		where set_id=#{setId}
+	</update>
+	
+	<!-- <delete id="deleteRoleResource" parameterType="java.lang.Integer">
+		delete from role_resource where roleId=#{param1} and resId=#{param2}
+	</delete> -->
+	
+	
+
+	<!-- <select id="listUserRole" parameterType="java.lang.Integer" resultMap="Role">
+		select r.rid,r.role_name from t_role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.uid and ur.rid= r.rid
+	</select>
+	
+	<select id="listUserRoleString" parameterType="java.lang.Integer" resultType="java.lang.String">
+		select r.role_name from role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.userId and ur.roleId= r.rid
+	</select> -->
+
+	<!-- <select id="listRoleByPage" parameterType="java.util.Map"
+		resultMap="Role">
+		select 
+		rid,role_name
+		from t_role
+		<where>
+			<if test="search!=null and search!=''">
+				and role_name like '%${search}%'
+			</if>
+		</where>
+		order by role_name ${dir} limit ${start},${length}
+	</select>
+
+	<select id="countRole" resultType="java.lang.Long"
+		parameterType="java.util.Map">
+		select count(*) from t_role
+		<where>
+			<if test="search!=null and search!=''"> 
+				role_name like '%${search}%'
+			</if>
+		</where>
+	</select> -->
+	
+	<resultMap type="com.myCRM.po.Set" id="Set">
+		<id property="setId" column="set_id"/>
+		<result property="name" column="set_name"/>
+		<result property="createBy" column="createby"/>
+		<result property="createDate" column="createdate"/>
+		<result property="updateBy" column="updateby"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="status" column="status"/>
+		<result property="iscoupon" column="iscoupon"/>
+		<result property="price" column="price"/>
+		<result property="startFrom" column="startfrom"/>
+		<result property="expireTo" column="expireto"/>
+	</resultMap>
+</mapper>
