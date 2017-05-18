@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.BusinessMapper">
+
+	<delete id="delete" parameterType="java.lang.String">
+		delete from business where bid=#{bid}
+	</delete>
+
+	<insert id="add" parameterType="com.myCRM.po.Business">
+		insert into business(bid,uid,cid,date)values(
+		#{bid,jdbcType=VARCHAR},
+		#{user.id,jdbcType=INTEGER},
+		#{card.cid,jdbcType=INTEGER},
+		#{date,jdbcType=DATE}
+		)
+	</insert>
+	
+	<insert id="addSub" parameterType="com.myCRM.po.Business">
+		insert into business_sub(bid,item_id,number,date)values(
+		#{bid,jdbcType=VARCHAR},
+		#{item.itemId,jdbcType=INTEGER},
+		#{item.count,jdbcType=INTEGER},
+		#{date,jdbcType=DATE}
+		)
+	</insert>
+	
+	<select id="list" resultMap="Business">
+		select b.bid,b.uid,u.username,b.cid,uc.description,b.date,b.total_price,i.item_id,i.name,i.price,
+		bs.item_id,bs.number,bs.date,cc.discount
+		from business b,t_user u, user_card uc, item i,business_sub bs,card_category cc
+		where b.uid=u.id and b.cid=uc.cid and i.item_id = bs.item_id and b.cid=cc.card_category_id
+	</select>
+	
+	<select id="findBusinessById"  parameterType="java.lang.String" resultMap="Business">
+		select b.bid,b.uid,u.username,b.cid,uc.description,b.date,b.total_price,i.item_id,i.name,i.price,
+		bs.item_id,bs.number,bs.date,cc.discount
+		from business b,t_user u, user_card uc, item i,business_sub bs,card_category cc
+		where b.uid=u.id and b.cid=uc.cid and i.item_id = bs.item_id and b.cid=cc.card_category_id and b.bid=#{bid}
+	</select>
+	
+	<select id="listBusinessByPage" parameterType="java.util.Map" resultMap="Business" >
+		select b.bid,b.uid,u.username,b.cid,uc.description,b.date,b.total_price,i.service_id,i.name,i.price,
+		bs.item_id,bs.number,bs.date,cc.discount
+		from business b,t_user u, user_card uc, service i,business_sub bs,card_category cc
+		where b.uid=u.id and b.cid=uc.cid and i.service_id = bs.item_id and b.cid=cc.card_category_id
+		<where>
+			<if test="search!=null and search!=''">
+				and u.username like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and name = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and price = '${mySearch.a1}'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and status ='${mySearch.a2}'
+			</if>
+		</where>
+		order by ${sort} ${dir} limit ${start},${length}
+	</select>
+
+	<select id="countBusiness" resultType="java.lang.Long" parameterType="java.util.Map">
+		select count(*) from business b,t_user u, user_card uc, service i,business_sub bs
+		where b.uid=u.id and b.cid=uc.cid and i.service_id = bs.item_id
+		<where>
+			<if test="search!=null and search!=''">
+				and u.username like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and name = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and price = '${mySearch.a1}'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and status ='${mySearch.a2}'
+			</if>
+		</where>
+	</select>
+
+	<update id="update" parameterType="com.myCRM.po.Business">
+		update business 
+		<set>
+			<if test="user.id != null">
+				uid=#{user.id},	
+			</if>
+			<if test="card.cid != null">
+				cid=#{card.cid},
+			</if>
+			<if test="date != null">
+				date=#{date},
+			</if>
+			<if test="totalPrice != null">
+				total_price=#{totalPrice},
+			</if>
+		</set>
+		where bid=#{bid} 
+	</update>
+
+	<resultMap type="com.myCRM.po.Business" id="Business">
+		<id property="bid" column="bid" />
+		<result property="date" column="date" />
+		<result property="totalPrice" column="total_price" />
+		<collection property="user" ofType="com.myCRM.po.User">
+			<id property="id" column="uid" />
+			<result property="username" column="username" />
+			<collection property="card" ofType="com.myCRM.po.Card">
+				<id property="cid" column="cid" />
+				<result property="description" column="description" />
+				<result property="amount" column="amount" />
+				<result property="plusAmount" column="plus_amount" />
+				<result property="remaining" column="remaining" />
+			</collection>
+		</collection>
+		<collection property="item" ofType="com.myCRM.po.Item">
+			<id property="itemId" column="item_id" />
+			<result property="name" column="name" />
+			<result property="price" column="price" />
+			<result property="count" column="number" />
+			<result property="itemDiscount" column="discount"/>
+		</collection>
+	</resultMap>
+</mapper>

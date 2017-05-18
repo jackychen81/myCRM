@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.CardMapper">
+
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from user_card where cid=#{cid}
+	</delete>
+
+	<insert id="add" parameterType="com.myCRM.po.Card">
+		insert into user_card
+		(cid,uid,description,amount,plus_amount,remaining,card_category_id)
+		values(
+		#{cid,jdbcType=INTEGER},
+		#{uid,jdbcType=INTEGER},
+		#{description,jdbcType=VARCHAR},
+		#{amount,jdbcType=DOUBLE},
+		#{plusAmount,jdbcType=DOUBLE},
+		#{amount,jdbcType=DOUBLE}+#{plusAmount,jdbcType=DOUBLE},
+		#{cardCategory.cardCategoryId,jdbcType=INTEGER}
+		)
+	</insert>
+	
+	<select id="list" resultMap="Card">
+		select
+		u.cid,u.uid,u.description,u.amount,u.plus_amount,u.remaining,
+		c.card_category_id,c.name,c.discount,c.status
+		from user_card u, card_category c where u.card_category_id = c.card_category_id
+	</select>
+	
+	<select id="findCardById" parameterType="java.lang.Integer" resultMap="Card">
+		select
+		u.cid,u.uid,u.description,u.amount,u.plus_amount,u.remaining,
+		c.card_category_id,c.name,c.discount,c.status
+		from user_card u, card_category c where u.card_category_id = c.card_category_id
+		and u.cid=#{cid}
+	</select>
+	
+	<select id="listCardByUid"  parameterType="java.lang.Integer" resultMap="Card">
+		select uc.cid,uc.uid,uc.description,cc.card_category_id,cc.name,cc.discount,cc.status,uc.remaining
+		from card_category cc,user_card uc, t_user t where t.id=uc.uid 
+		and uc.card_category_id= cc.card_category_id and t.id = #{id}
+	</select>
+
+	<select id="listCardByPage" parameterType="java.util.Map" resultMap="Card" >
+		select
+		u.cid,u.uid,u.description,u.amount,u.plus_amount,u.remaining,
+		cardCategory.card_category_id,cardCategory.name,cardCategory.discount,cardCategory.status
+		from user_card u, card_category cardCategory where u.card_category_id = cardCategory.card_category_id
+		<where>
+			<if test="search!=null and search!=''">
+				and u.description like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and u.uid = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and u.description like '%${mySearch.a1}%'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and cardCategory.discount ='${mySearch.a2}'
+			</if>
+			<if test="mySearch.a3 !=null and mySearch.a3 !=''">
+				and u.amount = '${mySearch.a3}'
+			</if>
+			<if test="mySearch.a4 !=null and mySearch.a4 !=''">
+				and u.plus_amount= '${mySearch.a4}'
+			</if>
+			<if test="mySearch.a5 !=null and mySearch.a5 !=''">
+				and u.remaining = '${mySearch.a5}'
+			</if>
+		</where>
+		order by 
+			<if test="sort == 'plusAmount'">
+				u.plus_amount
+			</if>
+			<if test="sort != 'plusAmount'">
+				${sort}
+			</if>
+		${dir} limit ${start},${length}
+	</select>
+
+	<select id="countCard" resultType="java.lang.Long"
+		parameterType="java.util.Map">
+		select count(*) from user_card 
+		<where>
+			<if test="search!=null and search!=''">
+				and description like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and uid = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and description like '%${mySearch.a1}%'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and discount ='${mySearch.a2}'
+			</if>
+			<if test="mySearch.a3 !=null and mySearch.a3 !=''">
+				and amount = '${mySearch.a3}'
+			</if>
+			<if test="mySearch.a4 !=null and mySearch.a4 !=''">
+				and plus_amount= '${mySearch.a4}'
+			</if>
+			<if test="mySearch.a5 !=null and mySearch.a5 !=''">
+				and remaining = '${mySearch.a5}'
+			</if>
+		</where>
+	</select>
+
+	<update id="update" parameterType="com.myCRM.po.Card">
+		update user_card 
+		<set>
+			<if test="description != null">
+				description=#{description},	
+			</if>
+			<if test="amount != null">
+				amount=#{amount},
+			</if>
+			<if test="plusAmount != null">
+				plus_amount=#{plusAmount},
+			</if>
+			<if test="cardCategory.cardCategoryId != null">
+				card_category_id=#{cardCategory.cardCategoryId},
+			</if>
+			remaining=#{amount}+#{plusAmount}
+		</set>
+		where cid=#{cid} 
+	</update>
+
+	<resultMap type="com.myCRM.po.Card" id="Card">
+		<id property="cid" column="cid" />
+		<result property="uid" column="uid" />
+		<result property="description" column="description" />
+		<result property="amount" column="amount" />
+		<result property="plusAmount" column="plus_amount" />
+		<result property="remaining" column="remaining" />
+		<collection property="cardCategory" ofType="com.myCRM.po.CardCategory">
+			<id property="cardCategoryId" column="card_category_id"></id>
+			<result property="name" column="name"/>
+			<result property="discount" column="discount"/>
+			<result property="cardCategoryStatus" column="status"/>
+		</collection>
+	</resultMap>
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.RoleMapper">
+	<sql id="roleColumns">
+		rid,role_name
+	</sql>
+	
+	<delete id="deleteUserRole" parameterType="java.lang.Integer">
+		delete from user_roles where uid=#{param1} and rid=#{param2}
+	</delete>
+	
+	<insert id="addUserRole" parameterType="java.lang.Integer">
+		insert into user_roles (uid,rid)values(#{param1},#{param2})
+	</insert>
+	
+	<insert id="addRoleResource" parameterType="java.lang.Integer">
+		insert into role_resource (roleId,resId)values(#{param1},#{param2})
+	</insert>
+	
+	<select id="findRoleByRid" parameterType="java.lang.Integer" resultType="com.myCRM.po.Role">
+		select <include refid="roleColumns"/> from t_role where rid=#{rid}
+	</select>
+	
+	<select id="findRoleByRoleName" parameterType="java.lang.String" resultType="com.myCRM.po.Role">
+		select <include refid="roleColumns"/> from t_role where role_name=#{roleName}
+	</select>
+	
+	<insert id="add" parameterType="com.myCRM.po.Role">
+		insert into t_role (role_name)values(#{roleName})
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_role where rid=#{rid}
+	</delete>
+	
+	<update id="update" parameterType="com.myCRM.po.Role">
+		update t_role 
+		<set>
+			<if test="role_name!=null">
+				role_name = #{roleName},
+			</if>
+		</set>
+		where rid=#{rid}
+	</update>
+	
+	<delete id="deleteRoleResource" parameterType="java.lang.Integer">
+		delete from role_resource where roleId=#{param1} and resId=#{param2}
+	</delete>
+	
+	<select id="list" resultMap="Role">
+		select 
+		<include refid="roleColumns"/>
+		from t_role
+	</select>
+
+	<select id="listUserRole" parameterType="java.lang.Integer" resultMap="Role">
+		select r.rid,r.role_name from t_role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.uid and ur.rid= r.rid
+	</select>
+	
+	<select id="listUserRoleString" parameterType="java.lang.Integer" resultType="java.lang.String">
+		select r.role_name from role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.userId and ur.roleId= r.rid
+	</select>
+
+	<select id="listRoleByPage" parameterType="java.util.Map"
+		resultMap="Role">
+		select 
+		rid,role_name
+		from t_role
+		<where>
+			<if test="search!=null and search!=''">
+				and role_name like '%${search}%'
+			</if>
+		</where>
+		order by role_name ${dir} limit ${start},${length}
+	</select>
+
+	<select id="countRole" resultType="java.lang.Long"
+		parameterType="java.util.Map">
+		select count(*) from t_role
+		<where>
+			<if test="search!=null and search!=''"> 
+				role_name like '%${search}%'
+			</if>
+		</where>
+	</select>
+	
+	<resultMap type="com.myCRM.po.Role" id="Role">
+		<id property="rid" column="rid"/>
+		<result property="roleName" column="role_name"/>
+	</resultMap>
+</mapper>

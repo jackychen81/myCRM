@@ -1,0 +1,39 @@
+service category
+id,name,status,createby,createdate,updateby,updatedate
+
+service
+id,price,name,createby,createdate,updateby,updatedate,servicecategory_id,assortmentcode,status
+---------------------------------------------------------------------------------------------------
+set
+id,name,createby,createdate,updateby,updatedate,status,iscoupon,price,startFrom,exprieTO,
+
+set_middel
+id,set_id,service_id
+
+business list:
+card的选择内容：cardcategory name + createdate
+
+Card的充值组合方案:
+id,name,discount,amount,plus,total,status,createby,createdate,updateby,updatedate,startFrom,exprieTO,
+
+user_card:
+id,方案id,uid,balance,createby,createdate,updateby,updatedate,status,startFrom,exprieTO,
+
+t_user
+增加：
+accountno
+
+business_sub
+增加：
+技师id，预约date
+
+status: 例如：10（预约）/20（完成未结算）/30（完成并结算）
+未完成的可成下次预约时间
+
+business
+增加：
+status: 例如：10（预约）/20（部分完成）/30（完全完成）
+预约date
+
+
+

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.CardCategoryMapper">
+
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from card_category where card_category_id=#{cardCategoryId}
+	</delete>
+
+	<insert id="add" parameterType="com.myCRM.po.CardCategory">
+		insert into card_category
+		(name,discount,status)
+		values(
+		#{name,jdbcType=VARCHAR},
+		#{discount,jdbcType=DOUBLE},
+		#{cardCategoryStatus,jdbcType=INTEGER}
+		)
+	</insert>
+	
+	<select id="findCardCategoryById" parameterType="java.lang.Integer" resultMap="CardCategory">
+		select	card_category_id,name,discount,status
+		from card_category where card_category_id=#{cardCategoryId}
+	</select>
+	
+	<select id="list" resultMap="CardCategory">
+		select	card_category_id,name,discount,status
+		from card_category
+	</select>
+	
+	<!-- <select id="listCardByPage" parameterType="java.util.Map" resultType="com.myCRM.po.CardCategory" >
+		select	card_category_id,name,discount,status
+		from card_category
+		<where>
+			<if test="search!=null and search!=''">
+				and name like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and name = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and discount = '${mySearch.a1}'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and status = '${mySearch.a2}'
+			</if>
+		</where>
+		order by ${sort} ${dir} limit ${start},${length}
+	</select> -->
+
+	<select id="countCardCategory" resultType="java.lang.Long"
+		parameterType="java.util.Map">
+		select count(*) from card_category 
+		<where>
+			<if test="search!=null and search!=''">
+				and name like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and name = '${mySearch.a0}'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and discount = '${mySearch.a1}'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and status = '${mySearch.a2}'
+			</if>
+		</where>
+	</select>
+
+	<update id="update" parameterType="com.myCRM.po.CardCategory">
+		update card_category 
+		<set>
+			<if test="name != null">
+				name=#{name},	
+			</if>
+			<if test="discount != null">
+				discount=#{discount},
+			</if>
+			<if test="cardCategoryStatus != null">
+				status=#{cardCategoryStatus},
+			</if>
+		</set>
+		where card_category_id=#{cardCategoryId} 
+	</update>
+	
+	<resultMap type="com.myCRM.po.CardCategory" id="CardCategory">
+		<id property="cardCategoryId" column="card_category_id"/>
+		<result property="name" column="name"/>
+		<result property="discount" column="discount"/>
+		<result property="cardCategoryStatus" column="status"/>
+	</resultMap>
+</mapper>

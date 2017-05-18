@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.UserMapper">
+
+	<select id="list" resultMap="User">
+		select u.id,u.username,u.password,u.gender,u.age,u.phone,u.wechat,
+		u.position,u.user_type,u.status,uc.cid,uc.uid,uc.description,
+		uc.amount,uc.plus_amount,uc.remaining,cc.card_category_id,cc.name,cc.discount,cc.status
+		from t_user u left join user_card uc on u.id=uc.uid
+		left join card_category cc on uc.card_category_id = cc.card_category_id
+	</select>
+	
+	<!-- <select id="rightUser" parameterType="java.lang.Integer" resultMap="User">
+		select emp_id,sp_name as username,sp_pwd,password,emp_stat,isActive from emp where emp_manager_id = #{id}
+	</select> -->
+
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_user where id=#{id}
+	</delete>
+
+	<insert id="add" parameterType="com.myCRM.po.User">
+		insert into t_user
+		(username,password,gender,age,phone,wechat,position,user_type,status)
+		values(
+		#{username,jdbcType=VARCHAR},
+		#{password,jdbcType=VARCHAR},
+		#{gender,jdbcType=INTEGER},
+		#{age,jdbcType=INTEGER},
+		#{phone,jdbcType=VARCHAR},
+		#{wechat,jdbcType=VARCHAR},
+		#{position,jdbcType=VARCHAR},
+		#{userType,jdbcType=INTEGER},
+		#{status,jdbcType=INTEGER}
+		)
+	</insert>
+	
+	<select id="findUserByUsername" parameterType="java.lang.String" resultType="com.myCRM.po.User">
+		select id,username,password,gender,age,phone,wechat,position,user_type,status
+		from t_user where username=#{username}<!--  COLLATE Chinese_PRC_CS_AI -->
+	</select>
+	
+	<select id="findUserByUserId" parameterType="java.lang.Integer" resultMap="User">
+		select u.id,u.username,u.password,u.gender,u.age,u.phone,u.wechat,
+		u.position,u.user_type,u.status,uc.cid,uc.uid,uc.description,
+		uc.amount,uc.plus_amount,uc.remaining,cc.card_category_id,cc.name,cc.discount,cc.status
+		from t_user u left join user_card uc on u.id=uc.uid
+		left join card_category cc on uc.card_category_id = cc.card_category_id where u.id = #{id}
+	</select>
+	
+	<!-- <select id="findUserRoleByuserName" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select r.rid from t_user u1,role r,user_roles ur
+	where u1.username=#{username} and u1.id=ur.userId and ur.roleId=r.rid
+	</select> -->
+	
+
+	<select id="listUserByPage" parameterType="java.util.Map" resultMap="User">
+		select u.id,u.username,u.password,u.gender,u.age,u.phone,u.wechat,
+		u.position,u.user_type,u.status,uc.cid,uc.uid,uc.description,
+		uc.amount,uc.plus_amount,uc.remaining,cc.card_category_id,cc.name,cc.discount,cc.status
+		from t_user u left join user_card uc on u.id=uc.uid
+		left join card_category cc on uc.card_category_id = cc.card_category_id
+		<where>
+			<if test="search!=null and search!=''">
+				and u.username like '%${search}%'
+			</if>
+			<if test="mySearch.a0 !=null and mySearch.a0 !=''">
+				and u.id like '%${mySearch.a0}%'
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+				and u.username like '%${mySearch.a1}%'
+			</if>
+			<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+				and u.gender =(case when 'male' like '%${mySearch.a2}%' then 1 else 0 end)
+			</if>
+			<if test="mySearch.a3 !=null and mySearch.a3 !=''">
+				and u.age like '%${mySearch.a3}%'
+			</if>
+			<if test="mySearch.a4 !=null and mySearch.a4 !=''">
+				and u.phone like '%${mySearch.a4}%'
+			</if>
+			<if test="mySearch.a5 !=null and mySearch.a5 !=''">
+				and u.status =(case when 'enable' like '%${mySearch.a5}%' then 1 else 0 end)
+			</if>
+		</where>
+		order by ${sort} ${dir} limit ${start},${length}
+	</select>
+
+	<select id="countUser" resultType="java.lang.Long"
+		parameterType="java.util.Map">
+		select count(*) from t_user 
+		<where>
+			<if test="search!=null and search!=''"> 
+				and username like '%${search}%'
+			</if>
+			<if test="mySearch.a0!=null and mySearch.a0!=''">
+				and (id like '%${mySearch.a0}%')
+			</if>
+			<if test="mySearch.a1 !=null and mySearch.a1 !=''">
+					and username like '%${mySearch.a1}%'
+				</if>
+				<if test="mySearch.a2 !=null and mySearch.a2 !=''">
+					and gender  =(case when 'male' like '%${mySearch.a2}%' then 1 else 0 end)
+				</if>
+				<if test="mySearch.a3 !=null and mySearch.a3 !=''">
+					and age like '%${mySearch.a3}%'
+				</if>
+				<if test="mySearch.a4 !=null and mySearch.a4 !=''">
+					and phone like '%${mySearch.a4}%'
+				</if>
+				<if test="mySearch.a5 !=null and mySearch.a5 !=''">
+					and status = (case when 'enable' like '%${mySearch.a5}%' then 1 else 0 end)
+				</if>
+		</where>
+	</select>
+
+	<!-- <update id="addStaff4Manager" parameterType="java.lang.Integer">
+		update emp set emp_manager_id = #{param1} where emp_id = #{param2}
+	</update>
+	
+	<update id="removerStaff4Manager" parameterType="java.lang.Integer">
+		update emp set emp_manager_id = null where emp_id = #{empId}
+	</update> -->
+	
+	<update id="update" parameterType="com.myCRM.po.User">
+		update t_user 
+		<set>
+			<if test="password != null and password != '' ">
+				password=#{password},	
+			</if>
+			<if test="username != null">
+				username=#{username},
+			</if>
+			<if test="age != null">
+				age=#{age},
+			</if>
+			<if test="gender!=null">
+				gender=#{gender},
+			</if>
+			<if test="phone!=null">
+				phone=#{phone},
+			</if>
+			<if test="userType != null">
+				user_type=#{userType},
+			</if>
+			<if test="wechat != null">
+				wechat=#{wechat},
+			</if>
+			<if test="position != null">
+				position=#{position},
+			</if>
+			<if test="status != null">
+				status=#{status},
+			</if>
+		</set>
+		where id=#{id} 
+	</update>
+
+	<!-- <resultMap type="com.myCRM.po.User" id="UserRoles">
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+		<result property="gender" column="gender" />
+		<result property="password" column="password" />
+		<result property="age" column="age" />
+		<result property="phone" column="phone" />
+		<result property="wechat" column="wechat" />
+		<result property="position" column="position" />
+		<result property="userType" column="user_type" />
+		<result property="status" column="status" />
+		<collection property="roles" ofType="java.lang.Integer">
+			<id property="rid" column="rid"/>
+			<result property="role_sign" column="role_sign"/>
+		</collection>
+	</resultMap> -->
+	
+	<resultMap type="com.myCRM.po.User" id="User">
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+		<result property="gender" column="gender" />
+		<result property="password" column="password" />
+		<result property="age" column="age" />
+		<result property="phone" column="phone" />
+		<result property="wechat" column="wechat" />
+		<result property="position" column="position" />
+		<result property="userType" column="user_type" />
+		<result property="status" column="status" />
+		<collection	property="card" ofType="com.myCRM.po.Card">
+			<id property="cid" column="cid"/>
+			<result property="uid" column="uid"/>
+			<result property="description" column="description"/>
+			<result property="amount" column="amount"/>
+			<result property="plusAmount" column="plus_amount"/>
+			<result property="remaining" column="remaining"/>
+			<collection property="cardCategory" ofType="com.myCRM.po.CardCategory">
+				<id property="cardCategoryId" column="card_category_id"></id>
+				<result property="name" column="name"/>
+				<result property="discount" column="discount"/>
+				<result property="cardCategoryStatus" column="status"/>
+			</collection>
+		</collection>	
+	</resultMap>
+</mapper>

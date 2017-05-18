@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-2.5.xsd 
+	http://www.springframework.org/schema/data/jpa 
+	http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login" />
+		<property name="successUrl" value="/index" />
+		<!-- <property name="unauthorizedUrl" value="/page/401" /> -->
+		<!-- 过滤链定义 -->    
+        <property name="filters">    
+        	<map>    
+            	<entry key="resource" value-ref="resourceCheckFilter"/>
+         	</map>    
+     	</property>  
+		
+		<property name="filterChainDefinitions">
+			<value>
+				/** = anon
+				<!-- 静态资源允许访问 -->
+                /resources/** = anon
+                <!-- 登录页允许访问 -->
+                /login = anon
+                /logout = anon
+                /index = user
+                <!-- 其他资源需要认证-->
+                <!-- 管理用户 -->
+               <!--  /admin/user/delete = authc,resource
+                /admin/user/list = authc,resource
+                /admin/user/update = authc,resource
+                /admin/user/add = authc,resource -->
+                
+                <!-- 管理角色 -->
+                <!-- /admin/role/list = authc,resource
+                /admin/role/add = authc,resource -->
+                
+                <!-- 管理资源 -->
+                <!-- /admin/resource/list = user -->
+                
+                
+                
+				</value>
+			</property>
+	</bean>
+
+	<!-- 整合了rememberMe功能的filter -->
+	<!-- <bean id="rememberAuthFilter" class="com.myCRM.shiro.filter.RememberAuthenticationFilter" /> -->
+	
+	<bean id="resourceCheckFilter" class="com.myCRM.shiro.filter.ResourceCheckFilter">
+		<property name="errorUrl" value="page/401"/>
+	</bean>
+	
+	<bean id="myUrlPermissionResovler" class="com.myCRM.shiro.permission.MyUrlPermissionResovler"/>
+	
+	<!-- 使用用户名+密码来登陆 -->
+	<bean id="shiroRealm" class="com.myCRM.shiro.ShiroRealm" >
+		<property name="credentialsMatcher" ref="passwordMatcher"/>
+		<property name="authenticationCachingEnabled" value="true"/>
+		<property name="authenticationCacheName" value="shiro-authenticationCache"/>
+		<property name="authorizationCachingEnabled" value="true"/>
+		<property name="authorizationCacheName" value="shiro-authorizationCache"/>
+	</bean>
+	
+	<!-- 使用md5加密密码来验证用户 -->
+	<bean id="passwordMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+	   <property name="hashAlgorithmName" value="md5"></property>
+    </bean>
+    
+	<!-- 安全管理器 class="org.apache.shiro.web.mgt.DefaultWebSecurityManager"-->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+	
+		<property name="authenticator" ref="authenticator" /> 
+		
+		<!-- 单个realm -->
+		<!-- <property name="realm" ref="shiroRealm" /> -->
+		
+		<!-- 多个realm -->
+		<property name="realms">
+			<list>
+				<ref bean="shiroRealm"/>
+				<!-- <ref bean="shiroRealmByMail"/> -->
+			</list>
+		</property>
+		
+		<property name="authorizer.permissionResolver" ref="myUrlPermissionResovler"/>
+		<!-- 需要使用cache的话加上这句-->
+		<property name="cacheManager" ref="shiroEhcacheManager" />
+		
+		<property name="sessionManager" ref="sessionManager"/>
+	</bean>
+
+	<!-- 配置认证 org.apache.shiro.authc.pam.ModularRealmAuthenticator-->
+	<bean id="authenticator" class="com.myCRM.shiro.MyModularRealmAuthenticator">  
+	    <property name="authenticationStrategy">  
+	        <bean class="org.apache.shiro.authc.pam.FirstSuccessfulStrategy" />  
+	    </property>  
+	</bean>
+
+	<!-- 用户授权信息Cache, 采用EhCache，需要的话就配置上此信息--> 
+	<bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:config/ehcache.xml" />
+	</bean>
+
+	<!-- 会话ID生成器 -->  
+ 	<bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
+
+	<!-- 会话DAO -->
+  	<!-- <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.MemorySessionDAO"/> -->
+  	
+  	<!-- 会话DAO，sessionManager里面的session需要保存在会话Dao里，没有会话Dao，session是瞬时的，没法从  
+     sessionManager里面拿到session -->    
+    <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">    
+        <property name="sessionIdGenerator" ref="sessionIdGenerator"/>    
+        <property name="activeSessionsCacheName" value="shiro-activeSessionCache"/>  
+    </bean>
+    
+	<!-- <bean id="logout" class="org.apache.shiro.web.filter.authc.LogoutFilter">  
+        <property name="redirectUrl" value="/login" />  
+    </bean> -->
+    
+    <!-- 会话管理器 -->
+   	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+   		<property name="globalSessionTimeout" value="1800000"/>
+        <property name="sessionDAO" ref="sessionDAO"/>
+        <property name="cacheManager" ref="shiroEhcacheManager"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionIdCookieEnabled" value="true"/>    
+        <property name="sessionIdCookie" ref="sessionIdCookie"/>    
+        <property name="sessionValidationSchedulerEnabled" value="true"/>  
+        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/> 
+   	</bean>
+   	
+	<!-- 会话Cookie模板 -->
+	<bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">    
+	        <constructor-arg value="sid"/>  
+	        <property name="httpOnly" value="true"/>  
+	        <property name="maxAge" value="-1"/>   
+	</bean>  
+	
+	<!-- 会话验证调度器 -->  
+    <bean id="sessionValidationScheduler" class="org.apache.shiro.session.mgt.ExecutorServiceSessionValidationScheduler ">  
+        <property name="interval" value="1800000"/>  
+        <property name="sessionManager" ref="sessionManager"/>  
+    </bean>
+
+    <!-- Shiro生命周期处理器 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+	<!-- 打开在方法上使用注解来判断 -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+</beans>
