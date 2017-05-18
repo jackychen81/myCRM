@@ -122,18 +122,29 @@ $(function(){
 			}); */
 	
 	$(".submit").on("click",function(){
-		//alert("a");
-		if(validateForm()){
+		var data = {bid:"1",totalPrice:"20.25",item:[{name:"项目1",price:"66.66"},{name:"项目2",price:"100.12"}]}
+		$.ajax({
+			url:"${pageContext.request.contextPath}/business/add",
+			type:"POST",
+			data: JSON.stringify(data),
+			dateType:"json",
+			contentType:"application/json;charset=UTF-8",
+			success:function(data){
+				console.log(data);
+			},
+			error:function(data){
+				console.log(data);
+			}
+		});
+		/* if(validateForm()){
 			$.post("${pageContext.request.contextPath}/business/add",$("#addBusiness").serializeArray(),function(flag){
-				//var result =  JSON.parse(flag);
 				if(flag){
 					alert("ok");
-					//table.ajax.url("${pageContext.request.contextPath}/business/listBusinessItemByPage/"+result.bid+"/"+result.cid );
 				}else{
 					alert("error");
 				}
 			});
-		}
+		} */
 	});
 	
 	$(".addItem").on("click",function(){

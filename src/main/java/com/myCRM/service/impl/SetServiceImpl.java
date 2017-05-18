@@ -33,4 +33,8 @@ public class SetServiceImpl implements SetService {
 		// TODO Auto-generated method stub
 	}
 
+	public void addMiddle(int setId, int itemId) {
+		setMapper.addMiddle(setId, itemId);
+	}
+
 }

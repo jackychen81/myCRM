@@ -3,10 +3,13 @@ package com.myCRM.contorller;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.json.JSONArray;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,20 +43,21 @@ public class BusinessController{
 		return "business/add";
 	}
 	
-	@RequestMapping(value="/add",method=RequestMethod.POST)
+	@RequestMapping(value="/add",method=RequestMethod.POST
+			,consumes = "application/json;charset=UTF-8"
+			,produces="application/json;charset=UTF-8")
 	@ResponseBody
-	public String add(Business business,Model model) {
-		try {
+	public String add(@RequestBody Business business) {
+		/*try {
 			String bid= Utils.getUUID();
 			business.setBid(bid);
 			businessService.add(business);
-			//model.addAttribute("bid", bid);
-//			return "{\"flag\":\"true\",\"bid\":\""+bid+"\",\"cid\":\""+business.getCard().getCid()+"\"}".toString();
 			return "true";
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "false";
-		}
+		}*/
+		return JSONArray.fromObject(business).toString();
 	}
 	
 	@RequestMapping(value="/delete/{id}",method=RequestMethod.GET)

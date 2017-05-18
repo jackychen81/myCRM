@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.myCRM.mapper.CardSchemeMapper">
+
+	<select id="list" resultMap="CardScheme">
+		select 
+		id,name,discount,amount,plus,total,createby,createdate,updateby,
+		updatedate,status,startfrom,expireto
+		from card_scheme
+	</select>
+	
+	<select id="listByPage" parameterType="java.util.Map" resultMap="CardScheme">
+		select 
+		id,name,discount,amount,plus,total,createby,createdate,updateby,
+		updatedate,status,startfrom,expireto
+		from card_scheme order by ${sort} ${dir}
+		limit ${start},${length}
+	</select>
+	
+	<select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
+		select count(*) from card_scheme order by ${sort} ${dir} limit ${start},${length}
+	</select>
+	
+	<select id="findCardSchemeByUserId" parameterType="java.lang.Integer" resultMap="CardScheme">
+		select 
+		id,name,discount,amount,plus,total,createby,createdate,updateby,
+		updatedate,status,startfrom,expireto
+		from card_scheme where id=#{id}
+	</select>
+	
+	<insert id="add" parameterType="com.myCRM.po.CardScheme">
+		insert into card_scheme (name,discount,amount,plus,total,createby,createdate,updateby,
+		updatedate,status,startfrom,expireto)values
+		(#{name,jdbcType=VARCHAR},
+		 #{discount,jdbcType=DECIMAL},
+		 #{amount,jdbcType=DECIMAL},
+		 #{plus,jdbcType=DECIMAL},
+		 #{total,jdbcType=DECIMAL},
+		 #{createBy,jdbcType=VARCHAR},
+		 #{createDate,jdbcType=DATE},
+		 #{updateBy,jdbcType=VARCHAR},
+		 #{updateDate,jdbcType=DATE},
+		 #{status,jdbcType=INTEGER},
+		 #{startFrom,jdbcType=DATE},
+		 #{expireTo,jdbcType=DATE}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from card_scheme where id=#{id}
+	</delete>
+	
+	<update id="update" parameterType="com.myCRM.po.CardScheme">
+		update card_scheme 
+		<set>
+			<if test="name!=null">
+				name = #{name},
+			</if>
+			<if test="updateBy!=null">
+				updateby = #{updateBy},
+			</if>
+			<if test="updateDate!=null">
+				updatedate = #{updateDate},
+			</if>
+			<if test="status!=null">
+				status = #{status},
+			</if>
+			<if test="discount!=null">
+				discount = #{discount},
+			</if>
+			<if test="amount!=null">
+				amount = #{amount},
+			</if>
+			<if test="startFrom!=null">
+				startfrom = #{startFrom},
+			</if>
+			<if test="expireTo!=null">
+				expireto = #{expireTo},
+			</if>
+			<if test="plus!=null">
+				plus = #{plus},
+			</if>
+			<if test="total!=null">
+				total = #{total},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<resultMap type="com.myCRM.po.CardScheme" id="CardScheme">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="createBy" column="createby"/>
+		<result property="createDate" column="createdate"/>
+		<result property="updateBy" column="updateby"/>
+		<result property="updateDate" column="updatedate"/>
+		<result property="status" column="status"/>
+		<result property="discount" column="discount"/>
+		<result property="amount" column="discount"/>
+		<result property="startFrom" column="startfrom"/>
+		<result property="expireTo" column="expireto"/>
+		<result property="total" column="total"/>
+		<result property="plus" column="plus"/>
+	</resultMap>
+</mapper>
