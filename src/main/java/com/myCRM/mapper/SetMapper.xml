@@ -8,14 +8,37 @@
 		from t_set
 	</select>
 	
+	<select id="listByPage" parameterType="java.util.Map" resultMap="Set">
+		select 
+		set_id,set_name,createby,createdate,updateby,updatedate,status,price,iscoupon,startfrom,expireto
+		from t_set order by 
+			<if test="sort == 'name'">
+				set_name
+			</if>
+			<if test="sort != 'name'">
+				${sort}
+			</if>
+		${dir} limit ${start},${length}
+	</select>
+	
+	<select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
+		select count(*) from t_set
+	</select>
+	
+	<select id="findSetById" parameterType="java.lang.Integer" resultMap="Set">
+		select 
+		set_id,set_name,createby,createdate,updateby,updatedate,status,price,iscoupon,startfrom,expireto
+		from t_set where set_id=#{setId}
+	</select>
+	
 	<insert id="add" parameterType="com.myCRM.po.Set">
 		insert into t_set (set_name,createby,createdate,updateby,updatedate,
 		status,iscoupon,price,startfrom,expireto)values
 		(#{name,jdbcType=VARCHAR},
 		 #{createBy,jdbcType=VARCHAR},
-		 #{createDate,jdbcType=DATE},
+		 #{createDate},
 		 #{updateBy,jdbcType=VARCHAR},
-		 #{updateDate,jdbcType=DATE},
+		 #{updateDate},
 		 #{status,jdbcType=INTEGER},
 		 #{iscoupon,jdbcType=INTEGER},
 		 #{price,jdbcType=DOUBLE},
@@ -65,45 +88,6 @@
 		</set>
 		where set_id=#{setId}
 	</update>
-	
-	<!-- <delete id="deleteRoleResource" parameterType="java.lang.Integer">
-		delete from role_resource where roleId=#{param1} and resId=#{param2}
-	</delete> -->
-	
-	
-
-	<!-- <select id="listUserRole" parameterType="java.lang.Integer" resultMap="Role">
-		select r.rid,r.role_name from t_role r, t_user u, user_roles ur where
-		u.id=#{uid} and u.id=ur.uid and ur.rid= r.rid
-	</select>
-	
-	<select id="listUserRoleString" parameterType="java.lang.Integer" resultType="java.lang.String">
-		select r.role_name from role r, t_user u, user_roles ur where
-		u.id=#{uid} and u.id=ur.userId and ur.roleId= r.rid
-	</select> -->
-
-	<!-- <select id="listRoleByPage" parameterType="java.util.Map"
-		resultMap="Role">
-		select 
-		rid,role_name
-		from t_role
-		<where>
-			<if test="search!=null and search!=''">
-				and role_name like '%${search}%'
-			</if>
-		</where>
-		order by role_name ${dir} limit ${start},${length}
-	</select>
-
-	<select id="countRole" resultType="java.lang.Long"
-		parameterType="java.util.Map">
-		select count(*) from t_role
-		<where>
-			<if test="search!=null and search!=''"> 
-				role_name like '%${search}%'
-			</if>
-		</where>
-	</select> -->
 	
 	<resultMap type="com.myCRM.po.Set" id="Set">
 		<id property="setId" column="set_id"/>

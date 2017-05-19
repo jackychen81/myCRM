@@ -12,6 +12,6 @@ public interface CardSchemeMapper extends BaseMapper<CardScheme>{
 
 	long count(Map<String, Object> params);
 	
-	CardScheme findCardSchemeByUserId(int id);
+	CardScheme findCardSchemeById(int id);
 
 }

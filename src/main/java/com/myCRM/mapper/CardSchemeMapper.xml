@@ -18,10 +18,10 @@
 	</select>
 	
 	<select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
-		select count(*) from card_scheme order by ${sort} ${dir} limit ${start},${length}
+		select count(*) from card_scheme
 	</select>
 	
-	<select id="findCardSchemeByUserId" parameterType="java.lang.Integer" resultMap="CardScheme">
+	<select id="findCardSchemeById" parameterType="java.lang.Integer" resultMap="CardScheme">
 		select 
 		id,name,discount,amount,plus,total,createby,createdate,updateby,
 		updatedate,status,startfrom,expireto

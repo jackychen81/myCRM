@@ -57,8 +57,8 @@ public class CardSchemeServiceImpl implements CardSchemeService {
 		return getObj;
 	}
 
-	public CardScheme findCardSchemeByUserId(int id) {
-		return cardSchemeMapper.findCardSchemeByUserId(id);
+	public CardScheme findCardSchemeById(int id) {
+		return cardSchemeMapper.findCardSchemeById(id);
 	}
 
 }

@@ -32,7 +32,7 @@ public class CardSchemeController {
 	@RequestMapping("/listByPage")
 	@ResponseBody
 	public String listByPage(@RequestParam(required = false) String aoData){
-		JSONObject cs = cardSchemeService.listByPage(aoData);
+		//JSONObject cs = cardSchemeService.listByPage(aoData);
 		return cardSchemeService.listByPage(aoData).toString();
 	}
 	
@@ -70,7 +70,7 @@ public class CardSchemeController {
 	@RequestMapping(value="/update/{id}",method=RequestMethod.GET)
 	public String update(Model model,@PathVariable int id){
 		CardScheme cardScheme = new CardScheme();
-		cardScheme = cardSchemeService.findCardSchemeByUserId(id);
+		cardScheme = cardSchemeService.findCardSchemeById(id);
 		model.addAttribute("cardScheme", cardScheme);
 		return "admin/cardScheme/update";
 	}

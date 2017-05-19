@@ -9,6 +9,6 @@ public interface CardSchemeService extends BaseMapper<CardScheme> {
 
 	JSONObject listByPage(String aoData);
 
-	CardScheme findCardSchemeByUserId(int id);
+	CardScheme findCardSchemeById(int id);
 
 }
