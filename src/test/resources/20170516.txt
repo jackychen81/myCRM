@@ -11,29 +11,29 @@ set_middel
 id,set_id,service_id
 
 business list:
-cardµÄÑ¡ÔñÄÚÈİ£ºcardcategory name + createdate
+cardçš„é€‰æ‹©å†…å®¹ï¼šcardcategory name + createdate
 
-CardµÄ³äÖµ×éºÏ·½°¸:
+Cardçš„å……å€¼ç»„åˆæ–¹æ¡ˆ:
 id,name,discount,amount,plus,total,status,createby,createdate,updateby,updatedate,startFrom,exprieTO,
 
 user_card:
-id,·½°¸id,uid,balance,createby,createdate,updateby,updatedate,status,startFrom,exprieTO,
+id,æ–¹æ¡ˆid,uid,balance,createby,createdate,updateby,updatedate,status,startFrom,exprieTO,
 
 t_user
-Ôö¼Ó£º
+å¢åŠ ï¼š
 accountno
 
 business_sub
-Ôö¼Ó£º
-¼¼Ê¦id£¬Ô¤Ô¼date
+å¢åŠ ï¼š
+æŠ€å¸ˆidï¼Œé¢„çº¦date
 
-status: ÀıÈç£º10£¨Ô¤Ô¼£©/20£¨Íê³ÉÎ´½áËã£©/30£¨Íê³É²¢½áËã£©
-Î´Íê³ÉµÄ¿É³ÉÏÂ´ÎÔ¤Ô¼Ê±¼ä
+status: ä¾‹å¦‚ï¼š10ï¼ˆé¢„çº¦ï¼‰/20ï¼ˆå®Œæˆæœªç»“ç®—ï¼‰/30ï¼ˆå®Œæˆå¹¶ç»“ç®—ï¼‰
+æœªå®Œæˆçš„å¯æˆä¸‹æ¬¡é¢„çº¦æ—¶é—´
 
 business
-Ôö¼Ó£º
-status: ÀıÈç£º10£¨Ô¤Ô¼£©/20£¨²¿·ÖÍê³É£©/30£¨ÍêÈ«Íê³É£©
-Ô¤Ô¼date
+å¢åŠ ï¼š
+status: ä¾‹å¦‚ï¼š10ï¼ˆé¢„çº¦ï¼‰/20ï¼ˆéƒ¨åˆ†å®Œæˆï¼‰/30ï¼ˆå®Œå…¨å®Œæˆï¼‰
+é¢„çº¦date
 
 
 

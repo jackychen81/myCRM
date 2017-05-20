@@ -11,6 +11,8 @@ import net.sf.json.JsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.myCRM.mapper.ResourceMapper;
+import com.myCRM.mapper.RoleMapper;
 import com.myCRM.mapper.UserMapper;
 import com.myCRM.po.Resource;
 import com.myCRM.po.User;
@@ -24,6 +26,10 @@ public class UserServiceImpl implements UserService{
 	private UserMapper userMapper;
 	@Autowired
 	private DataTableParams dataTableParams;
+	@Autowired
+	private RoleMapper roleMapper;
+	@Autowired
+	private ResourceMapper resourceMapper;
 	
 	public List<User> list() {
 		return userMapper.list();
@@ -65,7 +71,7 @@ public class UserServiceImpl implements UserService{
 	}
 
 	public List<Resource> listResourceByUid(int id) {
-		return userMapper.listResourceByUid(id);
+		return resourceMapper.listResourceByUid(id);
 	}
 
 	public User findUserByUserId(int id) {

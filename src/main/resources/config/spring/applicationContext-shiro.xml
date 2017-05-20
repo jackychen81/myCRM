@@ -27,7 +27,7 @@
 		
 		<property name="filterChainDefinitions">
 			<value>
-				/** = anon
+				
 				<!-- 静态资源允许访问 -->
                 /resources/** = anon
                 <!-- 登录页允许访问 -->
@@ -36,20 +36,19 @@
                 /index = user
                 <!-- 其他资源需要认证-->
                 <!-- 管理用户 -->
-               <!--  /admin/user/delete = authc,resource
+                /admin/user/delete = authc,resource
                 /admin/user/list = authc,resource
                 /admin/user/update = authc,resource
-                /admin/user/add = authc,resource -->
+                /admin/user/add = authc,resource
                 
                 <!-- 管理角色 -->
-                <!-- /admin/role/list = authc,resource
-                /admin/role/add = authc,resource -->
+                /admin/role/list = authc,resource
+                /admin/role/add = authc,resource
                 
                 <!-- 管理资源 -->
-                <!-- /admin/resource/list = user -->
+                /admin/resource/list = authc,resource
                 
-                
-                
+                /** = user
 				</value>
 			</property>
 	</bean>
@@ -138,7 +137,7 @@
         <property name="sessionIdCookieEnabled" value="true"/>    
         <property name="sessionIdCookie" ref="sessionIdCookie"/>    
         <property name="sessionValidationSchedulerEnabled" value="true"/>  
-        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/> 
+        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/>
    	</bean>
    	
 	<!-- 会话Cookie模板 -->

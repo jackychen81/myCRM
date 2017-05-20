@@ -18,14 +18,14 @@
 
 	<select id="listResourceByRoleId" resultType="com.myCRM.po.RoleResource" parameterType="java.lang.Integer">
 		select rr.rrid as rrId,rr.roleId,rr.resId,r.url,r.resPid,r.name from 
-		role_resource rr, resource r where rr.roleId = #{rid}
+		role_resource rr, t_resource r where rr.roleId = #{rid}
 		and rr.resid=r.resid
 	</select>
 
 	<select id="listResourceByUid" parameterType="java.lang.Integer"
 		resultType="com.myCRM.po.Resource">
 		select res.resid,res.name,res.url from t_resource res,role_resource rr,user_roles ur
-		where ur.userId=#{uid} and ur.roleId=rr.roleId and rr.resId=res.resId
+		where ur.uid=#{uid} and ur.rid=rr.roleId and rr.resId=res.resId
 	</select>
 
 	
