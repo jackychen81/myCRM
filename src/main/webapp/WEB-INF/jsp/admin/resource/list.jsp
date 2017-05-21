@@ -171,6 +171,20 @@ function addHoverDom(treeId, treeNode) {
 				console.log("resId="+_resId);
 				console.log("resPid="+_resPid);
 				newNode={name:"newNodesub1",resId:_resId,resPid:_resPid}
+				/*这里写update父节点的nocheck为true*/
+				updateNode={resId:treeNode.resId,nocheck:true};
+				$.ajax({
+					url:"${pageContext.request.contextPath}/admin/resource/update/"+treeNode.resId,
+					data:updateNode,
+					type:"post",
+					datatype:"json",
+					success:function(){
+						//$.alert("Update successfully");
+					},
+					error:function(){
+						$.alert("Update failed");
+					}
+				});
 			}
 			zTreeObj.addNodes(treeNode,-1,newNode);
 			$.ajax({

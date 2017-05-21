@@ -30,10 +30,30 @@
 	float: right;
 }
 #list{
-	border: 1px solid green;
-	height: 120px;
+	border: 1px solid #bbb;
+	height: 130px;
 	overflow-y: scroll;  
+	border-radius:5px;
 }
+#menuContent{
+	display:none; 
+	position: absolute; 
+	z-index: 9999;
+	background-color: #eee; 
+	border: 1px solid #ddd;
+	overflow-y: scroll; 
+}
+#treeDemo{
+	margin-top:0; 
+	width:180px; 
+	height: 200px;
+}
+/* #close{
+	background-color:#fff;
+	width: 13px;
+	height: 21px;
+	color: #aaa;
+} */
 </style>
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/jquery-1.11.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
@@ -46,7 +66,9 @@
 var setting = {
 		check: {
 			enable: true,
-			chkboxType: {"Y":"", "N":""}
+			//chkboxType: {"Y":"", "N":""}
+			chkStyle: "radio",
+			radioType: "all"
 		},
 		view: {
 			dblClickExpand: false
@@ -83,12 +105,14 @@ function onCheck(e, treeId, treeNode) {
 	if (v.length > 0 ) v = v.substring(0, v.length-1);
 	var cityObj = $("#citySel");
 	cityObj.attr("value", v);
+	hideMenu();
 }
 
 function showMenu() {
 	var cityObj = $("#citySel");
 	var cityOffset = $("#citySel").offset();
-	$("#menuContent").css({left:cityOffset.left + "px", top:cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+	//$("#menuContent").css({left:cityOffset.left + "px", top:cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+	$("#menuContent").css({left:cityOffset.left +cityObj.outerWidth()+ "px", top:cityOffset.top + "px"}).slideDown("fast");
 
 	$("body").bind("mousedown", onBodyDown);
 }
@@ -101,9 +125,15 @@ function onBodyDown(event) {
 		hideMenu();
 	}
 }
+function showAppointmentDate(){
+	$("#appointmentDate").slideDown("fast");
+}
+function hideAppointmentDate(){
+	$("#appointmentDate").fadeOut("fast");
+}
 $(function(){
 	$(".form_datetime").datetimepicker({
-		format:'yyyy/mm/dd',
+		format:'yyyy-mm-dd',
 		minView:"month",
 		autoclose:true,
 		todayBtn: true,
@@ -117,15 +147,24 @@ $(function(){
 	var remaining = null;
 	var userCard = null;
 	var cid = null;
-	var discount = null
+	var discount = null;
+	var userId = null;
+	var iscoupon = $("#iscoupon").is(':checked');
+	var isappointment = $("#isappointment").is(':checked');
+	if(!isappointment){
+		$("#appointment").val("");
+	}else{
+		$("#appointmentDate").css("display","");
+	}
+	$(".addItem").prop("disabled","disabled");
 	$(".user").on("change",function(){
 		var $card = $(".card");
-		var id= $(this).val();
+		userId= $(this).val();
 		//console.log(id);
 		$card.children().remove();
 		$card.append("<option></option>");
 		//getCardOfUser("${pageContext.request.contextPath}/admin/card/listCardByUid/"+id);
-		$.get("${pageContext.request.contextPath}/admin/card/listCardByUid/"+id,function(data){
+		$.get("${pageContext.request.contextPath}/admin/card/listCardByUid/"+userId,function(data){
 			userCard=data;
 			for(var i =0; i<data.length;i++){
 					$(".card").append("<option value='"+data[i].cid+"'>"+data[i].description+"</option>");
@@ -152,53 +191,9 @@ $(function(){
 	});
 	
 	
-	//var params = {"name":"search","value":[]};
-	/* var bid = "${bid}"==""?"No":"${bid}";
-	var table = $("#myTable").DataTable(
-			{
-				"processing" : false, // 是否显示取数据时的那个等待提示
-				"ajaxSource" : "${pageContext.request.contextPath}/business/listBusinessItemByPage/0/0",//这个是请求的地址
-				dom:'B<"new">rtip',
-				"order": [[ 0, "asc" ]],
-				"columns" : [
-				        {
-				        	"data":"itemId","visible" : false,
-				        },
-						{
-							"data" : "name"
-						},
-						{
-							"data":"price"
-						},
-						{
-							"data" : "itemDiscount"
-						},
-						{
-							"data" : "count"
-						},
-						{
-							"data" : null, "orderable":false,
-							"render" : function(data, type, row) {
-								var subTotal;
-								subTotal = row.price * row.count * row.itemDiscount/100;
-								return subTotal;
-							}
-						},
-						{
-							"data" : null, "orderable":false,
-							"render" : function(data, type, row) {
-								var button;
-								button = '<a href="${pageContext.request.contextPath}/business/update/'+row.itemId+'" class="update btn btn-xs btn-warning glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Edit"></a>&nbsp'
-									+'<button bid="'+row.itemId+'" class="setRole btn btn-xs btn-default glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-target="#myModal" data-placement="top" title="Set Role"></button>&nbsp'
-									+ '<button bid="'+row.itemId+'" class="remove btn btn-xs btn-danger glyphicon glyphicon-trash" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Delete"></button>'
-								return button;
-							}
-						}
-				],
-				select : true
-			}); */
 	$(".save").on("click",function(){
 		var _list = $("#list li");
+		var _appointment = $("#appointment").val();
 		if(_list.length==0){
 			alert("添加项目！");
 		}else{
@@ -211,7 +206,7 @@ $(function(){
 				_item.push({itemId:_itemId,count:_count});
 			}
 			
-			var _data = {item:_item};
+			var _data = {'user.id':userId,'card.cid':cid,item:_item,iscoupon:iscoupon,isappointment:isappointment,appointment:_appointment};
 			console.log(_data);
 			//data = {bid:"1",totalPrice:"20.25",item:[{name:"项目1",price:"66.66"},{name:"项目2",price:"100.12"}]}
 			/* $.ajax({
@@ -239,12 +234,34 @@ $(function(){
 		}
 		
 	});
+	
+	$("#myModal .modal-body").on("click","#iscoupon",function(){
+		iscoupon = $(this).is(':checked');
+	});
+	
+	$("#myModal .modal-body").on("click","#isappointment",function(){
+		isappointment = $(this).is(':checked');
+		if(isappointment){
+			showAppointmentDate();
+		}else{
+			hideAppointmentDate();
+			$("#appointment").val("");
+		}
+	});
 			
 	$(".add").on("click",function(){
 		var count = $("input[name='count']").val();
 		var itemId = $("input[name='item.itemId']").val();
 		if(itemId!="" && itemId!=null && count!="" && count!=0 && count!=null){
-			$("#list").append("<li> Item:<span id='itemId'>"+itemId+"</span>  x  count:<span id='count'>"+count+"</span><input type='button' id='close' value=&times></li>");
+			$("#list").append("<li> Item:<span id='itemId'>"+itemId+"</span>  x  count:<span id='count'>"+count+"</span><button type='button' id='close'><span aria-hidden='true'>&times;</span></button></li>");
+			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			var nodes = zTree.getCheckedNodes();
+			console.log(nodes);
+			if (nodes.length>0) { 
+				zTree.checkNode(nodes[0],false,true);
+			}
+			
+			//zTree.checkAllNodes(false);
 		}else{
 			alert("填写项目或数量");
 		}
@@ -407,44 +424,6 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 								<button class="btn btn-primary addItem" disabled="disabled" style="margin-left:12px">Add Item</button>
 							</div>
 					</div>
-					<!-- <div id="serviceList" class="col-md-6">
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col-md-2">
-									<label>Item Name</label>
-								</div>
-					      		<div class="col-md-4">
-					      			<select class="form-control item" name="item.itemId">
-										<option></option>	      		
-					      			</select>
-					      		</div>
-				      		
-					      		<div class="col-md-2">
-					      			<label>Count</label>
-					      		</div>
-					      		<div class="col-md-4">
-					      			<input class="form-control count"  type="text" name="count">
-					      		</div>
-							</div>
-							<div class="row">
-								<div class="col-md-2">
-									<label>Item Name</label>
-								</div>
-					      		<div class="col-md-4">
-					      			<select class="form-control item" name="item.itemId">
-										<option></option>	      		
-					      			</select>
-					      		</div>
-				      		
-					      		<div class="col-md-2">
-					      			<label>Count</label>
-					      		</div>
-					      		<div class="col-md-4">
-					      			<input class="form-control count"  type="text" name="count">
-					      		</div>
-							</div>
-						</div>
-					</div> -->
 					
 				</div>
 				<div>
@@ -476,32 +455,60 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 	        <h4 class="modal-title" id="myModalLabel">Add Item</h4>
 	      </div>
 	      <div class="modal-body">
-	        	<div class="row">
-		      		<div class="col-md-2">
-		      			<label>Name</label>
-		      		</div>
-		      		<div class="col-md-4">
-		      			<input class="form-control" id="citySel" type="text" name="item.itemId" readonly value="" style="width:120px;" onclick="showMenu();" />
-		      			<div id="menuContent" class="menuContent" style="display:none;">
-							<ul id="treeDemo" class="ztree" style="margin-top:0; width:180px; height: 300px;"></ul>
+	      	<div class="container-fluid">
+				<div class="col-md-6">
+					<div class="row">
+	    				<div class="col-md-2">
+		    				<label>name</label>
+		    			</div>
+		    			<div class="col-md-4">
+							<input class="form-control input-sm" name="item.itemId" id="citySel" style="width: 120px" readonly type="text" onclick="showMenu();"/>    				
+		    			</div>
+		    			<div class="col-md-6 checkbox">
+							<label style="float: right">
+								<input type="checkbox" id="iscoupon" name="iscoupon">团购
+							</label>
 						</div>
-		      		</div>
-		      		<div class="col-md-6">
-      				<ul class="nav nav-sidebar" id="list">
-      					
-      				</ul>
-	      		</div>
-	      		</div>
-	      		<div class="row">
-	      			<div class="col-md-2">
-		      			<label>Count</label>
-		      		</div>
-	      			<div class="col-md-4">
-		      			<input class="form-control" type="text" name="count">
-		      			<button class="btn btn-s add">Add</button>
-		      		</div>
-		      	</div>
-	      		
+	    			</div>
+	    			<div class="row">
+	    				<div class="col-md-2">
+		    				<label>count</label>
+		    			</div>
+		    			<div class="col-md-4">
+							<input class="form-control input-sm" style="width: 120px" type="text" name="count"/>    				
+		    			</div>
+		    			<div class="col-md-6 checkbox">
+							<label style="float: right">
+								<input type="checkbox" id="isappointment" name="isappointment">预约
+							</label>
+						</div>
+	    			</div>
+	    			<div id="appointmentDate" class="row" style="display: none;">
+						<div class="col-md-2">
+							<label>Date</label>
+						</div>
+						<div class="col-md-4">
+							<input id="appointment" class="form-control input-sm form_datetime" name="appointment" style="width: 120px" type="text">
+						</div>
+					</div>
+	    			<div class="row">
+	    				<div class="col-md-2">
+		    				<label>add</label>
+		    			</div>
+		    			<div class="col-md-4">
+							<button class="btn btn-s add btn-success">Add</button>		
+		    			</div>
+    				</div>
+				</div>
+	    		<div class="col-md-6">
+	    			<div class="row">
+		    			<div class="col-md-12">
+							<ul class="nav nav-sidebar" id="list">	
+							</ul>    				
+		    			</div>
+	    			</div>
+	    		</div>
+	     	 </div>
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -509,6 +516,10 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 	      </div>
 	    </div>
 	  </div>
+	</div>
+	<div id="menuContent" class="menuContent">
+		<ul id="treeDemo" class="ztree">
+		</ul>
 	</div>
 </body>
 </html>

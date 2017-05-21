@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50537
 File Encoding         : 65001
 
-Date: 2017-05-20 21:23:21
+Date: 2017-05-22 15:58:11
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -223,28 +223,29 @@ CREATE TABLE `t_resource` (
   `resPid` int(11) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `url` varchar(255) DEFAULT NULL,
+  `nocheck` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`resId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=gbk;
 
 -- ----------------------------
 -- Records of t_resource
 -- ----------------------------
-INSERT INTO `t_resource` VALUES ('1', '0', '系统权限管理', '/admin/**');
-INSERT INTO `t_resource` VALUES ('100', '1', '用户', '/admin/user/**');
-INSERT INTO `t_resource` VALUES ('101', '1', '角色', '/admin/role/**');
-INSERT INTO `t_resource` VALUES ('102', '1', '资源', '/admin/resource/**');
-INSERT INTO `t_resource` VALUES ('10000', '100', '添加', '/admin/user/add');
-INSERT INTO `t_resource` VALUES ('10001', '100', '删除', '/admin/user/delete');
-INSERT INTO `t_resource` VALUES ('10002', '100', '更新', '/admin/user/update');
-INSERT INTO `t_resource` VALUES ('10003', '100', '查询', '/admin/user/list');
-INSERT INTO `t_resource` VALUES ('10100', '101', '添加', '/admin/role/add');
-INSERT INTO `t_resource` VALUES ('10101', '101', '删除', '/admin/role/delete');
-INSERT INTO `t_resource` VALUES ('10102', '101', '更新', '/admin/role/update');
-INSERT INTO `t_resource` VALUES ('10103', '101', '查询', '/admin/role/list');
-INSERT INTO `t_resource` VALUES ('10200', '102', '添加', '/admin/resource/add');
-INSERT INTO `t_resource` VALUES ('10201', '102', '删除', '/admin/resource/delete');
-INSERT INTO `t_resource` VALUES ('10202', '102', '更新', '/admin/resource/update');
-INSERT INTO `t_resource` VALUES ('10203', '102', '查询', '/admin/resource/list');
+INSERT INTO `t_resource` VALUES ('1', '0', '系统权限管理', '/admin/**', '1');
+INSERT INTO `t_resource` VALUES ('100', '1', '用户', '/admin/user/**', '1');
+INSERT INTO `t_resource` VALUES ('101', '1', '角色', '/admin/role/**', '1');
+INSERT INTO `t_resource` VALUES ('102', '1', '资源', '/admin/resource/**', '1');
+INSERT INTO `t_resource` VALUES ('10000', '100', '添加', '/admin/user/add', '0');
+INSERT INTO `t_resource` VALUES ('10001', '100', '删除', '/admin/user/delete', '0');
+INSERT INTO `t_resource` VALUES ('10002', '100', '更新', '/admin/user/update', '0');
+INSERT INTO `t_resource` VALUES ('10003', '100', '查询', '/admin/user/list', '0');
+INSERT INTO `t_resource` VALUES ('10100', '101', '添加', '/admin/role/add', '0');
+INSERT INTO `t_resource` VALUES ('10101', '101', '删除', '/admin/role/delete', '0');
+INSERT INTO `t_resource` VALUES ('10102', '101', '更新', '/admin/role/update', '0');
+INSERT INTO `t_resource` VALUES ('10103', '101', '查询', '/admin/role/list', '0');
+INSERT INTO `t_resource` VALUES ('10200', '102', '添加', '/admin/resource/add', '0');
+INSERT INTO `t_resource` VALUES ('10201', '102', '删除', '/admin/resource/delete', '0');
+INSERT INTO `t_resource` VALUES ('10202', '102', '更新', '/admin/resource/update', '0');
+INSERT INTO `t_resource` VALUES ('10203', '102', '查询', '/admin/resource/list', '0');
 
 -- ----------------------------
 -- Table structure for t_role

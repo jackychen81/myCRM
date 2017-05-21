@@ -34,6 +34,7 @@ business
 增加：
 status: 例如：10（预约）/20（部分完成）/30（完全完成）
 预约date
+iscoupon是否团购
 
 
 

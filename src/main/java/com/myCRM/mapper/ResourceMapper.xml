@@ -2,18 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.myCRM.mapper.ResourceMapper">
 	<sql id="basicCol">
-		resId,resPid,name,url
+		resId,resPid,name,url,nocheck
 	</sql>
 	<select id="list" resultType="com.myCRM.po.Resource">
 		select <include refid="basicCol"/>  from t_resource
 	</select>
 	<insert id="add" parameterType="com.myCRM.po.Resource">
 		insert into t_resource
-		(resId,resPid,name,url)values(
+		(resId,resPid,name,url,nocheck)values(
 		#{resId,jdbcType=INTEGER},
 		#{resPid,jdbcType=INTEGER},
 		#{name,jdbcType=VARCHAR},
-		#{url,jdbcType=VARCHAR})
+		#{url,jdbcType=VARCHAR},
+		#{nocheck,jdbcType=BOOLEAN})
 	</insert>
 
 	<select id="listResourceByRoleId" resultType="com.myCRM.po.RoleResource" parameterType="java.lang.Integer">
@@ -24,10 +25,31 @@
 
 	<select id="listResourceByUid" parameterType="java.lang.Integer"
 		resultType="com.myCRM.po.Resource">
-		select res.resid,res.name,res.url from t_resource res,role_resource rr,user_roles ur
+		select res.resid,res.name,res.url,res.nocheck from t_resource res,role_resource rr,user_roles ur
 		where ur.uid=#{uid} and ur.rid=rr.roleId and rr.resId=res.resId
 	</select>
 
+	<select id="listResourceByResPid"  parameterType="java.lang.Integer" resultType="com.myCRM.po.Resource">
+		select res.resid,res.name,res.url,res.nocheck,res.resPid from t_resource res where res.resPid=#{id}
+	</select>
+	
+	<select id="findResourceByResId"  parameterType="java.lang.Integer" resultType="com.myCRM.po.Resource">
+		select res.resid,res.name,res.url,res.nocheck from t_resource res where res.resid=#{id}
+	</select>
+	
+	<delete id="deleteSubResourceByResPid"  parameterType="java.util.Set">
+		delete from t_resource where resPid in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} 
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByBatch" parameterType="java.util.Set">
+		delete from t_resource where resId in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")"> 
+		#{item} 
+		</foreach>
+	</delete>
 	
 	<select id="countResource" resultType="java.lang.Long"
 		parameterType="java.util.Map">
@@ -53,6 +75,9 @@
 			</if>
 			<if test="url != null and url != ''">
 				url = #{url},
+			</if>
+			<if test="nocheck != null and url != ''">
+				nocheck = #{nocheck},
 			</if>
 		</set>
 		where resId=#{resId}

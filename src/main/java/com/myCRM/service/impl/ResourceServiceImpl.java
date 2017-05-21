@@ -1,6 +1,9 @@
 package com.myCRM.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -32,8 +35,43 @@ public class ResourceServiceImpl implements ResourceService {
 	}
 
 	public void delete(int id) {
-		resourceMapper.delete(id);
-
+		Resource resource = resourceMapper.findResourceByResId(id);
+		Set<Integer> deleteId = new HashSet<Integer>();
+		Set<Integer> deletePid = new HashSet<Integer>();
+		boolean flag = true;
+		if(resource.isNocheck()==true){
+			deleteId.add(resource.getResId());
+			int tempRid = resource.getResId();
+			while(flag){
+				List<Resource> resList = resourceMapper.listResourceByResPid(tempRid);
+				if(resList.size()==0) break;
+				if(resList.size()==1 && resList.get(0).isNocheck()==false){
+					flag = false;
+				}
+				int i=1;
+				for(Resource res:resList){
+					if(res.isNocheck()==false){
+						
+						if(i==resList.size()){
+							flag=false;
+						}
+						deletePid.add(res.getResPid());
+						i++;
+					}else{
+						tempRid =res.getResId();
+						deleteId.add(tempRid);
+					}
+				}
+			}
+			System.out.println("删除id="+deleteId.toString()+"====删除Pid"+deletePid.toString());
+			List<Integer> ids = new ArrayList<Integer>(deleteId);
+			resourceMapper.deleteByBatch(ids);
+			List<Integer> pids = new ArrayList<Integer>(deletePid);
+			resourceMapper.deleteSubResourceByResPid(pids);
+		}else{
+			System.out.println("删除末级：id="+id);
+			resourceMapper.delete(id);
+		}
 	}
 
 	public List<Resource> listResourceByUid(int uid) {
