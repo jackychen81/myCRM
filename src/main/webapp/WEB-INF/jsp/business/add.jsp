@@ -9,17 +9,30 @@
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/datatable/css/jquery.dataTables.css">
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/datetimepicker/css/bootstrap-datetimepicker.min.css">
+<link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/ztree/css/zTreeStyle.css">
 <style type="text/css">
 .addBusiness{
-border: 1px solid #eee;
-background-color: #eee
+	border: 1px solid #eee;
+	background-color: #eee;
 }
 .error{
 	color:#a94442;
 }
 #addBusiness{
-padding-top: 10px;
-padding-bottom: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+#serviceList{
+	border: 1px solid red;
+	background-color: red;
+}
+.addItem{
+	float: right;
+}
+#list{
+	border: 1px solid green;
+	height: 120px;
+	overflow-y: scroll;  
 }
 </style>
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/jquery-1.11.3.min.js"></script>
@@ -28,8 +41,66 @@ padding-bottom: 10px;
 <script type="text/javascript"	src="${pageContext.request.contextPath}/resources/datatable/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/init.js"></script>
+<script type="text/javascript"	src="${pageContext.request.contextPath}/resources/ztree/js/jquery.ztree.all.js"></script>
 <script type="text/javascript">
+var setting = {
+		check: {
+			enable: true,
+			chkboxType: {"Y":"", "N":""}
+		},
+		view: {
+			dblClickExpand: false
+		},
+		data : {
+			simpleData : {
+				enable : true,
+				idKey : "resId",
+				pIdKey : "resPid",
+				rootPId : 0
+			},
+			key : {
+				url : "iurl"
+			}
+		},
+		callback: {
+			beforeClick: beforeClick,
+			onCheck: onCheck
+		}
+	};
+function beforeClick(treeId, treeNode) {
+	var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+	zTree.checkNode(treeNode, !treeNode.checked, null, true);
+	return false;
+}
 
+function onCheck(e, treeId, treeNode) {
+	var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+	nodes = zTree.getCheckedNodes(true),
+	v = "";
+	for (var i=0, l=nodes.length; i<l; i++) {
+		v += nodes[i].name + ",";
+	}
+	if (v.length > 0 ) v = v.substring(0, v.length-1);
+	var cityObj = $("#citySel");
+	cityObj.attr("value", v);
+}
+
+function showMenu() {
+	var cityObj = $("#citySel");
+	var cityOffset = $("#citySel").offset();
+	$("#menuContent").css({left:cityOffset.left + "px", top:cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+
+	$("body").bind("mousedown", onBodyDown);
+}
+function hideMenu() {
+	$("#menuContent").fadeOut("fast");
+	$("body").unbind("mousedown", onBodyDown);
+}
+function onBodyDown(event) {
+	if (!(event.target.id == "menuBtn" || event.target.id == "citySel" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+		hideMenu();
+	}
+}
 $(function(){
 	$(".form_datetime").datetimepicker({
 		format:'yyyy/mm/dd',
@@ -39,7 +110,6 @@ $(function(){
 	});
 	
 	/*init company and user  */
-	//getCompany("${pageContext.request.contextPath}/admin/company/list");
 	getAllItem("${pageContext.request.contextPath}/admin/item/listAllItem");
 	getUser("${pageContext.request.contextPath}/admin/user/listAll");
 	
@@ -67,11 +137,18 @@ $(function(){
 	$(".card").on("change",function(){
 		//$(".remaining").val(remaining);
 		cid =$(this).val();
-		for(var i=0;i<userCard.length;i++){
-			if(userCard[i].cid==cid){
-				$(".remaining").val(userCard[i].remaining);
+		if(cid==null || cid==""){
+			$(".addItem").prop("disabled","disabled");
+		}else{
+			for(var i=0;i<userCard.length;i++){
+				if(userCard[i].cid==cid){
+					$(".remaining").val(userCard[i].remaining);
+				}
 			}
+			$(".addItem").prop("disabled","");
+			
 		}
+		
 	});
 	
 	
@@ -120,36 +197,76 @@ $(function(){
 				],
 				select : true
 			}); */
-	
-	$(".submit").on("click",function(){
-		var data = {bid:"1",totalPrice:"20.25",item:[{name:"项目1",price:"66.66"},{name:"项目2",price:"100.12"}]}
-		$.ajax({
-			url:"${pageContext.request.contextPath}/business/add",
-			type:"POST",
-			data: JSON.stringify(data),
-			dateType:"json",
-			contentType:"application/json;charset=UTF-8",
-			success:function(data){
-				console.log(data);
-			},
-			error:function(data){
-				console.log(data);
+	$(".save").on("click",function(){
+		var _list = $("#list li");
+		if(_list.length==0){
+			alert("添加项目！");
+		}else{
+			var _item = new Array();
+			
+			for(var i=0;i<_list.length;i++){
+				var $list = $(_list[i]);
+				var _itemId = $list.children()[0].innerHTML;
+				var _count = $list.children()[1].innerHTML
+				_item.push({itemId:_itemId,count:_count});
 			}
-		});
-		/* if(validateForm()){
-			$.post("${pageContext.request.contextPath}/business/add",$("#addBusiness").serializeArray(),function(flag){
-				if(flag){
-					alert("ok");
-				}else{
-					alert("error");
+			
+			var _data = {item:_item};
+			console.log(_data);
+			//data = {bid:"1",totalPrice:"20.25",item:[{name:"项目1",price:"66.66"},{name:"项目2",price:"100.12"}]}
+			/* $.ajax({
+				url:"${pageContext.request.contextPath}/business/add",
+				type:"POST",
+				data: JSON.stringify(data),
+				dateType:"json",
+				contentType:"application/json;charset=UTF-8",
+				success:function(data){
+					console.log(data);
+				},
+				error:function(data){
+					console.log(data);
 				}
-			});
-		} */
+			}); */
+			/* if(validateForm()){
+				$.post("${pageContext.request.contextPath}/business/add",$("#addBusiness").serializeArray(),function(flag){
+					if(flag){
+						alert("ok");
+					}else{
+						alert("error");
+					}
+				});
+			} */
+		}
+		
+	});
+			
+	$(".add").on("click",function(){
+		var count = $("input[name='count']").val();
+		var itemId = $("input[name='item.itemId']").val();
+		if(itemId!="" && itemId!=null && count!="" && count!=0 && count!=null){
+			$("#list").append("<li> Item:<span id='itemId'>"+itemId+"</span>  x  count:<span id='count'>"+count+"</span><input type='button' id='close' value=&times></li>");
+		}else{
+			alert("填写项目或数量");
+		}
+		
+	})
+	
+	$("#myModal .modal-body").on("click","#close",function(){
+		$(this).parent("li").remove();
+	});
+	
+	$("#myModal .modal-body").on("click",".item",function(){
+		
 	});
 	
 	$(".addItem").on("click",function(){
-		//$('#myModal').modal('toggle');
-		var itemName=null;
+		$('#myModal').modal('toggle');
+		$.get("${pageContext.request.contextPath}/admin/resource/listResource",function(result){
+			zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, result.data);
+			zTreeObj.expandAll(true);
+		});
+		
+		/* var itemName=null;
 		var itemCount=null;
 		itemName = $(".item option:selected").text();
 		itemCount = $(".count").val();
@@ -161,7 +278,7 @@ $(function(){
 					"<td>"+(price*itemCount*discount/100)+"</td>"+
 					"<td><button class='remove btn btn-xs btn-danger glyphicon glyphicon-trash' data-trigger='hover' data-toggle='tooltip' data-placement='top' title='Delete'></button></td>"+
 				"</tr>";
-		$("#myTable tbody").append(tr);
+		$("#myTable tbody").append(tr); */
 	});
 	
 	$("#myTable").on("click",".remove",function(){
@@ -224,8 +341,8 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 				<h1 class="page-header">Add Business</h1>
 				<div class="table-responsive">
-					<div class="addBusiness">
-						<form id="addBusiness" action="" method="post">
+					<div class="addBusiness col-md-12">
+						<!-- <form id="addBusiness" action="" method="post"> -->
 							<div class="container-fluid">
 								<div class="row">
 									<div class="col-md-2">
@@ -249,7 +366,7 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 								<br/>
 								<div class="row">
 									<div class="col-md-2">
-										<label>Remaining</label>
+										<label>Balance</label>
 									</div>
 									<div class="col-md-4">
 									  <input class="form-control remaining" type="text" name=card.remaining readonly>
@@ -261,37 +378,76 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 										<input class="form-control" type="text" name=totalPrice readonly value="0">
 									</div>
 								</div>
-								<br/>
-								<div class="row">
+								<!-- <div class="row">
 									<div class="col-md-2">
 										<input class="btn btn-primary submit" type="button" value="submit">
 									</div>
-								</div>
+								</div> -->
 								<div class="row">
 									<div class="col-md-2">
-										<label>Item Name</label>
+										<!-- <label></label> -->
 									</div>
 						      		<div class="col-md-4">
-						      			<select class="form-control item" name="item.itemId">
+						      			<!-- <select class="form-control item" name="item.itemId">
 											<option></option>	      		
-						      			</select>
+						      			</select> -->
 						      		</div>
 					      		
 						      		<div class="col-md-2">
-						      			<label>Count</label>
+						      			<!-- <label></label> -->
 						      		</div>
 						      		<div class="col-md-4">
-						      			<input class="form-control count"  type="text" name="count">
+						      			<!-- <input class="form-control count"  type="text" name="count"> -->
 						      		</div>
 								</div>
 								
 							</div>
-						</form>
+						<!-- </form> -->
 							<div class="addBusiness">
-								<button class="btn btn-primary addItem" style="margin-left:12px">Add Item</button>
+								<button class="btn btn-primary addItem" disabled="disabled" style="margin-left:12px">Add Item</button>
 							</div>
 					</div>
-					<div>
+					<!-- <div id="serviceList" class="col-md-6">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col-md-2">
+									<label>Item Name</label>
+								</div>
+					      		<div class="col-md-4">
+					      			<select class="form-control item" name="item.itemId">
+										<option></option>	      		
+					      			</select>
+					      		</div>
+				      		
+					      		<div class="col-md-2">
+					      			<label>Count</label>
+					      		</div>
+					      		<div class="col-md-4">
+					      			<input class="form-control count"  type="text" name="count">
+					      		</div>
+							</div>
+							<div class="row">
+								<div class="col-md-2">
+									<label>Item Name</label>
+								</div>
+					      		<div class="col-md-4">
+					      			<select class="form-control item" name="item.itemId">
+										<option></option>	      		
+					      			</select>
+					      		</div>
+				      		
+					      		<div class="col-md-2">
+					      			<label>Count</label>
+					      		</div>
+					      		<div class="col-md-4">
+					      			<input class="form-control count"  type="text" name="count">
+					      		</div>
+							</div>
+						</div>
+					</div> -->
+					
+				</div>
+				<div>
 						<table class="display dataTable no-footer" id="myTable" width="100%">
 							<thead>
 								<tr>
@@ -306,7 +462,6 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 							<tbody></tbody>
 						</table>
 					</div>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -321,18 +476,32 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 	        <h4 class="modal-title" id="myModalLabel">Add Item</h4>
 	      </div>
 	      <div class="modal-body">
-	      	<div class="row">
-	      		<!-- <div><label>Name</label></div>
-	      		<div>
-	      			<select class="item" name="item.itemId">
-						<option></option>	      		
-	      			</select>
+	        	<div class="row">
+		      		<div class="col-md-2">
+		      			<label>Name</label>
+		      		</div>
+		      		<div class="col-md-4">
+		      			<input class="form-control" id="citySel" type="text" name="item.itemId" readonly value="" style="width:120px;" onclick="showMenu();" />
+		      			<div id="menuContent" class="menuContent" style="display:none;">
+							<ul id="treeDemo" class="ztree" style="margin-top:0; width:180px; height: 300px;"></ul>
+						</div>
+		      		</div>
+		      		<div class="col-md-6">
+      				<ul class="nav nav-sidebar" id="list">
+      					
+      				</ul>
 	      		</div>
-	      		<div><label>Count</label></div>
-	      		<div>
-	      			<input type="text" name="count">
-	      		</div> -->
-	      	</div>
+	      		</div>
+	      		<div class="row">
+	      			<div class="col-md-2">
+		      			<label>Count</label>
+		      		</div>
+	      			<div class="col-md-4">
+		      			<input class="form-control" type="text" name="count">
+		      			<button class="btn btn-s add">Add</button>
+		      		</div>
+		      	</div>
+	      		
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
