@@ -94,13 +94,16 @@ function beforeClick(treeId, treeNode) {
 	zTree.checkNode(treeNode, !treeNode.checked, null, true);
 	return false;
 }
-
 function onCheck(e, treeId, treeNode) {
 	var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
 	nodes = zTree.getCheckedNodes(true),
 	v = "";
+	id="";
+	price="";
 	for (var i=0, l=nodes.length; i<l; i++) {
 		v += nodes[i].name + ",";
+		id=nodes[i].itemId;
+		price=nodes[i].price;
 	}
 	if (v.length > 0 ) v = v.substring(0, v.length-1);
 	var cityObj = $("#citySel");
@@ -202,8 +205,9 @@ $(function(){
 			for(var i=0;i<_list.length;i++){
 				var $list = $(_list[i]);
 				var _itemId = $list.children()[0].innerHTML;
-				var _count = $list.children()[1].innerHTML
-				_item.push({itemId:_itemId,count:_count});
+				var _count = $list.children()[3].innerHTML;
+				var _price = $list.children()[2].innerHTML
+				_item.push({itemId:_itemId,count:_count,price:_price});
 			}
 			
 			var _data = {'user.id':userId,'card.cid':cid,item:_item,iscoupon:iscoupon,isappointment:isappointment,appointment:_appointment};
@@ -250,16 +254,19 @@ $(function(){
 	});
 			
 	$(".add").on("click",function(){
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+		var nodes = zTree.getCheckedNodes();
 		var count = $("input[name='count']").val();
-		var itemId = $("input[name='item.itemId']").val();
-		if(itemId!="" && itemId!=null && count!="" && count!=0 && count!=null){
-			$("#list").append("<li> Item:<span id='itemId'>"+itemId+"</span>  x  count:<span id='count'>"+count+"</span><button type='button' id='close'><span aria-hidden='true'>&times;</span></button></li>");
-			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
-			var nodes = zTree.getCheckedNodes();
-			console.log(nodes);
+		var name = $("input[name='item.name']").val();//nodes[0].name;
+		var id = $("input[name='item.itemId']").val();//nodes[0].itemId;
+		var price = nodes[0].price;
+		if(name!="" && name!=null && count!="" && count!=0 && count!=null){
+			$("#list").append("<li><span id='itemId' style='display: none;'>"+id+"</span>Item:<span id='name'>"+name+"</span>		<span id='price'>"+price+"</span>  x  <span id='count'>"+count+"</span><button type='button' id='close'><span aria-hidden='true'>&times;</span></button></li>");
+			
+			/* console.log(nodes);
 			if (nodes.length>0) { 
 				zTree.checkNode(nodes[0],false,true);
-			}
+			} */
 			
 			//zTree.checkAllNodes(false);
 		}else{
@@ -278,6 +285,8 @@ $(function(){
 	
 	$(".addItem").on("click",function(){
 		$('#myModal').modal('toggle');
+		//$("input[name='item.name']").val("");
+		//$("input[name='count']").val("");
 		$.get("${pageContext.request.contextPath}/admin/item/listAllItem",function(result){
 			zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, result);
 			zTreeObj.expandAll(true);
@@ -462,7 +471,9 @@ function retrieveData(sSource111, aoData111, fnCallback111) {
 		    				<label>name</label>
 		    			</div>
 		    			<div class="col-md-4">
-							<input class="form-control input-sm" name="item.itemId" id="citySel" style="width: 120px" readonly type="text" onclick="showMenu();"/>    				
+							<input class="form-control input-sm" name="item.name" id="citySel" style="width: 120px" readonly type="text" onclick="showMenu();"/>    				
+							<input type="hidden" name="item.price">
+							<input type="hidden" name="item.itemId">
 		    			</div>
 		    			<div class="col-md-6 checkbox">
 							<label style="float: right">
