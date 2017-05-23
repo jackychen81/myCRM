@@ -76,7 +76,7 @@
 			<if test="url != null and url != ''">
 				url = #{url},
 			</if>
-			<if test="nocheck != null and url != ''">
+			<if test="nocheck != null and nocheck != ''">
 				nocheck = #{nocheck},
 			</if>
 		</set>

@@ -8,7 +8,7 @@
 
 	<insert id="add" parameterType="com.myCRM.po.Item">
 		insert into service
-		(service_id,name,price,status,createby,createdate,service_pid)
+		(service_id,name,price,status,createby,createdate,service_pid,nocheck)
 		values(
 		#{itemId,jdbcType=INTEGER},
 		#{name,jdbcType=VARCHAR},
@@ -16,12 +16,15 @@
 		#{status,jdbcType=INTEGER},
 		#{createBy,jdbcType=VARCHAR},
 		#{createDate,jdbcType=DATE},
-		#{itemPid,jdbcType=INTEGER}
+		#{itemPid,jdbcType=INTEGER},
+		#{nocheck,jdbcType=BOOLEAN}
 		)
 	</insert>
 	
 	<select id="list" resultMap="Item">
-		select service_id,name,price,createby,createdate,updateby,updatedate,service_pid,status from service
+		select service_id,name,price,createby,createdate,updateby,
+		updatedate,service_pid,status,nocheck
+		 from service
 	</select>
 	
 	<select id="findItemById"  parameterType="java.lang.Integer" resultMap="Item">
@@ -103,6 +106,9 @@
 			<if test="updateDate != null">
 				updatedate=#{updatedDate},
 			</if>
+			<if test="nocheck != null and nocheck != ''">
+				nocheck = #{nocheck},
+			</if>
 		</set>
 		where service_id=#{itemId} 
 	</update>
@@ -119,5 +125,6 @@
 		<result property="createDate" column="createdate"/>
 		<result property="updateBy" column="updateby"/>
 		<result property="updateDate" column="updatedate"/>
+		<result property="nocheck" column="nocheck"/>
 	</resultMap>
 </mapper>

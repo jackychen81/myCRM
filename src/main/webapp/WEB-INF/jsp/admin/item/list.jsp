@@ -224,7 +224,21 @@ function addHoverDom(treeId, treeNode) {
 				var _itemPid = treeNode.itemId;
 				console.log("itemId2="+_itemId);
 				console.log("itemPid2="+_itemPid);
-				newNode={name:"newNodesub1",itemId:_itemId,itemPid:_itemPid}
+				newNode={name:"newNodesub1",itemId:_itemId,itemPid:_itemPid};
+				/*这里写update父节点的nocheck为true*/
+				updateNode={resId:treeNode.resId,nocheck:true};
+				$.ajax({
+					url:"${pageContext.request.contextPath}/admin/item/update/"+treeNode.resId,
+					data:updateNode,
+					type:"post",
+					datatype:"json",
+					success:function(){
+						//$.alert("Update successfully");
+					},
+					error:function(){
+						$.alert("Update failed");
+					}
+				});
 			}
 			zTreeObj.addNodes(treeNode,-1,newNode);
 			$.ajax({

@@ -76,8 +76,8 @@ var setting = {
 		data : {
 			simpleData : {
 				enable : true,
-				idKey : "resId",
-				pIdKey : "resPid",
+				idKey : "itemId",
+				pIdKey : "itemPid",
 				rootPId : 0
 			},
 			key : {
@@ -278,8 +278,8 @@ $(function(){
 	
 	$(".addItem").on("click",function(){
 		$('#myModal').modal('toggle');
-		$.get("${pageContext.request.contextPath}/admin/resource/listResource",function(result){
-			zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, result.data);
+		$.get("${pageContext.request.contextPath}/admin/item/listAllItem",function(result){
+			zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, result);
 			zTreeObj.expandAll(true);
 		});
 		
