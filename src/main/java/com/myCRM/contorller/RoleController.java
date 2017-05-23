@@ -113,8 +113,8 @@ public class RoleController {
 		return "false";
 	}
 	
-	/**待实现*/
-	/*@RequestMapping("/addRoleResource/{rId}")
+	/**添加角色的权限*/
+	@RequestMapping("/addRoleResource/{rId}")
 	@ResponseBody
 	public String addRoleResource(@PathVariable int rId,@RequestParam(required = false) int resId){
 		try {
@@ -124,9 +124,9 @@ public class RoleController {
 			e.printStackTrace();
 			return "false";
 		}
-	}*/
-	
-	/*@RequestMapping("/delRoleResource/{rId}")
+	}
+	/**删除角色的权限*/
+	@RequestMapping("/delRoleResource/{rId}")
 	@ResponseBody
 	public String delRoleResource(@PathVariable int rId,@RequestParam(required = false) int resId){
 		try {
@@ -136,5 +136,5 @@ public class RoleController {
 			e.printStackTrace();
 			return "false";
 		}
-	}*/
+	}
 }

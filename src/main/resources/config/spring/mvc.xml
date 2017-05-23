@@ -24,7 +24,7 @@
         class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="com.myCRM.tools.MyDateConverter"></bean>
+                <!-- <bean class="com.myCRM.tools.MyDateConverter"></bean> -->
             </set>
         </property>
     </bean>

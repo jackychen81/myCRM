@@ -59,8 +59,10 @@
 	</select>
 	
 	<select id="listUserRoleString" parameterType="java.lang.Integer" resultType="java.lang.String">
-		select r.role_name from role r, t_user u, user_roles ur where
-		u.id=#{uid} and u.id=ur.userId and ur.roleId= r.rid
+		<!-- select r.role_name from role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.userId and ur.roleId= r.rid -->
+		select r.role_name from t_role r, t_user u, user_roles ur where
+		u.id=#{uid} and u.id=ur.uid and ur.rid= r.rid
 	</select>
 
 	<select id="listRoleByPage" parameterType="java.util.Map"

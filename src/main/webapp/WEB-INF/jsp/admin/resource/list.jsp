@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Service List</title>
+<title>Role List</title>
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/bootstrap/css/bootstrap.min.css">
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/ztree/css/zTreeStyle.css">
@@ -33,8 +33,8 @@ var setting = {
 		data : {
 			simpleData : {
 				enable : true,
-				idKey : "itemId",
-				pIdKey : "itemPid",
+				idKey : "resId",
+				pIdKey : "resPid",
 				rootPId : 0
 			},
 			key:{
@@ -57,56 +57,25 @@ var setting = {
 			beforeEditName: zTreeBeforeEditName
 		}
 };
-
 function zTreeBeforeEditName(treeId, treeNode) {
-	var _name=null;
-	var _price=treeNode.price==undefined?0:treeNode.price;
-	var _status=null;
-	var _itemPid=treeNode.itemPid;
-	console.log(treeNode);
+	var _url= treeNode.url==null?"":treeNode.url;
 	$.confirm({
 		title:"Edit",
 		type:"orange",
-		content:"<div class='container'>"+
-					"<from id='updateItem'>"+
-						"<div class='row'>"+
-							"<div class='col-md-3'>"+
-								"<input type='text' class='form-control' name='name' value="+treeNode.name+">"+
-							"</div>"+
-						"</div>"+
-						"<br/>"+
-						"<div class='row'>"+
-							"<div class='col-md-3'>"+
-								"<input type='text' class='form-control' name='price' value="+_price+">"+
-							"</div>"+
-						"</div>"+
-						"<div class='row'>"+
-							"<div class='col-md-3'>"+
-								"<label><input type='checkbox' name='status' value="+treeNode.status+">启用</label>"+
-							"</div>"+
-						"</div>"+
-					"</form>"+
-				"</div>",
+		content:"<div class='container'><div class='row'><div class='col-md-3'><input type='text' class='form-control' name='name' value="+treeNode.name+"></div></div><br/>"+
+		"<div class='row'><div class='col-md-3'><input type='text' class='form-control' name='url' value="+_url+"></div></div></div>",
 		buttons:{
 			UPDATE:{
 				text:"Update",
 				action:function(){
-					_name = $("input[name='name']").val();
-					_price = $("input[name='price']").val();
-					_status = $("input[name='status']").val();
-					console.log(_name);
-					console.log(_price);
-					console.log(_status);
+					var _name = $("input[name='name']").val();
+					var _url = $("input[name='url']").val();
 					$.ajax({
-						url:"${pageContext.request.contextPath}/admin/item/update/"+treeNode.itemId+"?name="
-								+_name+"&price="+_price+"&status="+_status+"&itemPid="+_itemPid,
+						url:"${pageContext.request.contextPath}/admin/resource/update/"+treeNode.resId+"?name="+_name+"&url="+_url,
 						type:"post",
-						//data:_item,
-						//data:_item,
 						success:function(){
 							treeNode.name=_name;
-							treeNode.price=_price;
-							treeNode.status=_status;
+							treeNode.url=_url;
 							zTreeObj.updateNode(treeNode);
 							$.alert("Update successfully");	
 						},
@@ -119,27 +88,6 @@ function zTreeBeforeEditName(treeId, treeNode) {
 			Cancel:{
 				text:"Cancel"
 			}
-		},
-		onContentReady:function(){
-			if(treeNode.status==1){
-				$("input[name='status']").attr("checked",true);
-			}else{
-				$("input[name='status']").attr("checked",false);
-			}
-			$("input[name='status']").on("click",function(){
-				var isChecked = $(this).is(':checked');
-				if(isChecked){
-					$("input[name='status']").val("1");
-				}else{
-					$("input[name='status']").val("0");
-				}
-			});
-			_name = $("input[name='name']").val();
-			_price = $("input[name='price']").val();
-			_status = $("input[name='status']").val();
-			console.log(_name);
-			console.log(_price);
-			console.log(_status);
 		}
 	});
 	return false;
@@ -152,9 +100,7 @@ function zTreeOnDblClick(event, treeId, treeNode){
 	});
 }
 
-
 function zTreeBeforeRemove(treeId, treeNode){
-	console.log(treeNode.itemId);
 	$.confirm({
 		title:"Delete item",
 		icon: 'glyphicon glyphicon-exclamation-sign',
@@ -164,7 +110,7 @@ function zTreeBeforeRemove(treeId, treeNode){
 				text:"Yes",
 				action:function(){
 					$.ajax({
-						url:"${pageContext.request.contextPath}/admin/item/delete/"+treeNode.itemId,
+						url:"${pageContext.request.contextPath}/admin/resource/delete/"+treeNode.resId,
 						type:"post",
 						success:function(){
 							zTreeObj.removeNode(treeNode);
@@ -192,12 +138,12 @@ function zTreeBeforeRemove(treeId, treeNode){
 function addHoverDom(treeId, treeNode) {
 	var aObj = $("#" + treeNode.tId + "_span");
 	var newNode=null;
-	if ($("#addBtn_"+treeNode.itemId).length>0) return;
+	if ($("#addBtn_"+treeNode.tId).length>0) return;
 	if(!treeNode.editNameFlag){
-		var editStr = "<span class='button add' id='addBtn_" +treeNode.itemId
+		var editStr = "<span class='button add' id='addBtn_" +treeNode.tId
 		+ "' title='"+treeNode.name+"' ></span>";
 		aObj.after(editStr);
-		var btn = $("#addBtn_"+treeNode.itemId);
+		var btn = $("#addBtn_"+treeNode.tId);
 		if (btn) btn.bind("click", function(){
 			//alert("resId="+treeNode.resId+",resPid="+treeNode.resPid);
 			//alert(treeNode.children);
@@ -211,24 +157,38 @@ function addHoverDom(treeId, treeNode) {
 					var isLastNode = treeNode.children[i].isLastNode;
 					//alert(isLastNode);
 					if(isLastNode){
-						var _itemId = treeNode.children[i].itemId+1;
-						var _itemPid = treeNode.children[i].itemPid;
-						console.log("itemId1="+_itemId);
-						console.log("itemPid1="+_itemPid);
-						newNode={name:"newNode1",itemId:_itemId,itemPid:_itemPid};
+						var _resId = treeNode.children[i].resId+1;
+						var _resPid = treeNode.children[i].resPid;
+						console.log("resId="+_resId);
+						console.log("resPid="+_resPid);
+						newNode={name:"newNode1",resId:_resId,resPid:_resPid};
 					}
 				}
 			}else /* if(treeNode.children==null) */{
 				//alert("null");
-				var _itemId = parseInt(treeNode.itemId+"00");
-				var _itemPid = treeNode.itemId;
-				console.log("itemId2="+_itemId);
-				console.log("itemPid2="+_itemPid);
-				newNode={name:"newNodesub1",itemId:_itemId,itemPid:_itemPid}
+				var _resId = parseInt(treeNode.resId+"00");
+				var _resPid = treeNode.resId;
+				console.log("resId="+_resId);
+				console.log("resPid="+_resPid);
+				newNode={name:"newNodesub1",resId:_resId,resPid:_resPid}
+				/*这里写update父节点的nocheck为true*/
+				updateNode={resId:treeNode.resId,nocheck:true};
+				$.ajax({
+					url:"${pageContext.request.contextPath}/admin/resource/update/"+treeNode.resId,
+					data:updateNode,
+					type:"post",
+					datatype:"json",
+					success:function(){
+						//$.alert("Update successfully");
+					},
+					error:function(){
+						$.alert("Update failed");
+					}
+				});
 			}
 			zTreeObj.addNodes(treeNode,-1,newNode);
 			$.ajax({
-				url:"${pageContext.request.contextPath}/admin/item/add",
+				url:"${pageContext.request.contextPath}/admin/resource/addResource",
 				data:newNode,
 				type:"post",
 				datatype:"json",
@@ -246,7 +206,7 @@ function addHoverDom(treeId, treeNode) {
 
 
 function removeHoverDom(treeId, treeNode) {
-	$("#addBtn_"+treeNode.itemId).unbind().remove();
+	$("#addBtn_"+treeNode.tId).unbind().remove();
 };
 
 $(function(){
@@ -257,13 +217,13 @@ $(function(){
 	$("#admin").addClass("active");
 	
 	$.ajax({
-		url:"${pageContext.request.contextPath}/admin/item/listAllItem",
+		url:"${pageContext.request.contextPath}/admin/resource/listResource",
 		async : false,
 		datatype:"json",
 		//contentType:"text/html; charset=UTF-8",
 		success:function(result){
-			//console.log(result);
-			zTreeObj = $.fn.zTree.init($(".ztree"),setting,result);
+			console.log(result.data);
+			zTreeObj = $.fn.zTree.init($(".ztree"),setting,result.data);
 			zTreeObj.expandAll(true);
 		},
 		error:function(){
@@ -271,13 +231,56 @@ $(function(){
 		}
 		
 	});
-	
-	
 });
 </script>
 <body>
 </head>
 <body>
+	<%-- <nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed"
+				data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+				aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Project name</a>
+		</div>
+		<div id="navbar" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="${pageContext.request.contextPath}/index">Home</a></li>
+				<li class="active"><shiro:hasRole name="ADMIN">
+						<a href="${pageContext.request.contextPath}/admin/user/list">Admin</a>
+					</shiro:hasRole></li>
+				<li><shiro:hasRole name="HR">
+						<a href="javascript:;">HR</a>
+					</shiro:hasRole></li>
+				<li class="dropdown"><a href="#" class="dropdown-toggle"
+					data-toggle="dropdown" role="button" aria-haspopup="true"
+					aria-expanded="false">Forms <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="${pageContext.request.contextPath}/cargo2k/customer/list">Cargo2k</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Leave Application</a></li>
+						<li><a href="#">OT Application</a></li>
+						<li><a href="#">Annual Leave</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Cash Advance</a></li>
+						<li><a href="#">Payment Voucher</a></li>
+						<li role="separator" class="divider"></li>
+					</ul></li>
+				<li><a href="javascript:;">Settings</a></li>
+				<li><a href="${pageContext.request.contextPath}/logout">Logout</a></li>
+				<li><a href="javascript:;">Help</a></li>
+			</ul>
+			<!-- <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form> -->
+		</div>
+	</div>
+	</nav> --%>
 	<jsp:include page="../../top.jsp"></jsp:include>
 	<div class="container-fluid">
 		<div class="row">
@@ -290,9 +293,18 @@ $(function(){
 					<li><a href="${pageContext.request.contextPath}/task/deployTasks">Deployment Management</a></li>
 				</ul>
 				<hr>
+				<!-- <ul class="nav nav-sidebar">
+          	<li><a href="#" link="cargo2k/customer/list">Cargo2k</a></li>
+            <li><a href="">Leave Application</a></li>
+            <li><a href="">OT Application</a></li>
+          </ul>
+           <hr>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+          </ul> -->
 			</div>
 			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-				<h1 class="page-header">Service List</h1>
+				<h1 class="page-header">Resource List</h1>
 				<div class="table-responsive">
 						<div class="ztree"></div>
 				</div>

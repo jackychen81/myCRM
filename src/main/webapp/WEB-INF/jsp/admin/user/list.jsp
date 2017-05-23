@@ -302,7 +302,7 @@ tr.shown td.details-control{
 		 // Setup - add a text input to each footer cell
 	    $('#myTable tfoot th').each( function () {
 	        var title = $('#myTable thead th').eq( $(this).index() ).text();
-	        if(title!="Action"){
+	        if(title!="Action" && title!=""){
 	        	$(this).html( '<input type="text" style="width:100%" placeholder="'+title+'" />' );
 	        }
 	    } );

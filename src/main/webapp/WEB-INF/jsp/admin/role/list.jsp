@@ -13,6 +13,7 @@
 <link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/editor/css/select.dataTables.min.css">
 <link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/editor/css/editor.dataTables.min.css">
 <link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/j-confirm/css/jquery-confirm.css">
+<link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/ztree/css/zTreeStyle.css">
 <style type="text/css">
 #controller{
 	border:1px solid yellow;
@@ -68,6 +69,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript"	src="${pageContext.request.contextPath}/resources/datatable/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript"	src="${pageContext.request.contextPath}/resources/j-confirm/js/jquery-confirm.js"></script>
+<script type="text/javascript"	src="${pageContext.request.contextPath}/resources/ztree/js/jquery.ztree.all.js"></script>
 <script type="text/javascript">
 	
 	$(function() {
@@ -77,6 +79,27 @@
 			$(this).removeClass("active");
 		});
 		$("#admin").addClass("active");
+		
+		var setting = {
+				data : {
+					simpleData : {
+						enable : true,
+						idKey : "resId",
+						pIdKey : "resPid",
+						rootPId : 0
+					},
+					key : {
+						url : "iurl"
+					}
+				},
+				check : {
+					enable : true
+				},
+				callback : {
+					onCheck : changeResourceStatus
+				}
+			};
+		
 		
 		var params = {"name":"search","value":[]};
 		
@@ -144,17 +167,86 @@
 			 	}
 			});
 		});
-		
+		//SET ROLE
+		$('#myTable').on('click','.setPermission',function(e) {
+			e.preventDefault();
+			var tr = $(this).closest('tr');
+			var row = table.row(tr);
+			if (row.child.isShown()) {
+				// This row is already open - close it
+				tr.removeClass('shown');
+				checkTreeStatus();
+			} else {
+				// Open this row
+				$("tbody tr").each(function() {
+					$(this).removeClass('shown');
+				});
+				tr.addClass('shown');
+				checkTreeStatus();
+			}
+
+			function checkTreeStatus() {
+				$("tbody tr").each(function(index, dom) {
+					row = table.row(dom);
+					if ($(this).hasClass("shown")) {
+						row.child(initTree()).show();
+						rId = row.data().rid;
+						$.ajax({url : "../../admin/resource/listRoleResByRoleId/"+ rId,
+							async : false,
+							success : function(result) {
+								//alert("ok"+row.data().rid);
+								//console.log(result.data);
+								zTreeObj = $.fn.zTree.init($(".ztree"),setting,result.data);
+								zTreeObj.expandAll(true);
+								},
+								error : function() {
+									alert("error");
+								}
+							});
+						} else {
+							row.child.hide();
+						}
+				});
+			}
+		});
+		//change resource checked status
+		function changeResourceStatus(event, treeId, treeNode) {
+			//alert(treeNode.resId + ", " + treeNode.name + "," + treeNode.checked+",rId="+rId);
+			var url;
+			if (treeNode.checked) {
+				url = "addRoleResource/" + rId + "?resId="
+						+ treeNode.resId;
+			} else {
+				url = "delRoleResource/" + rId + "?resId="
+						+ treeNode.resId;
+			}
+			//alert(url);
+			$.ajax({
+				url : url,
+				async : false,
+				success : function(result) {
+					console.log("ok");
+				},
+				error : function() {
+					alert("error");
+				}
+			});
+		}
+
+		//SET INIT DATA
+		function initTree() {
+			return '<ul class="ztree" style="width:230px; overflow:auto;"></ul>';
+		}
 		 // Setup - add a text input to each footer cell
-	    $('#myTable tfoot th').each( function () {
+	    /* $('#myTable tfoot th').each( function () {
 	        var title = $('#myTable thead th').eq( $(this).index() ).text();
 	        if(title!="Action"){
 	        	$(this).html( '<input type="text" style="width:100%" placeholder="'+title+'" />' );
 	        }
-	    } );
+	    } ); */
 		 
 	 	// Apply the search
-	   table.columns().eq( 0 ).each( function ( colIdx ) {
+	  /*  table.columns().eq( 0 ).each( function ( colIdx ) {
 	        $( 'input', table.column( colIdx ).footer() ).on( 'change', function () {
 	        	params.value.length=0;
 	        	$( 'input[type="text"]').each(function(index){
@@ -165,7 +257,7 @@
 	        	console.log(params.value);
 	            table.draw();
 	        } );
-	    } );
+	    } ); */
 		
 		//自定义按钮，然后回通过datatable的dom绑定到表单上
 		$("div.new").html('<button href="#" id="new" class="dt-button" style="float:left">New</button>');

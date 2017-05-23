@@ -79,11 +79,13 @@ public class ResourceController {
 	@ResponseBody
 	public String update(@RequestParam(required = false) String url,
 			@RequestParam(required = false) String name,
+			@RequestParam(required = false) Boolean nocheck,
 			@PathVariable int resId){
 		Resource res = new Resource();
 		res.setResId(resId);
 		res.setName(name);
 		res.setUrl(url);
+		if(nocheck!=null) res.setNocheck(nocheck);
 		try {
 			resourceService.update(res);
 			return "true";
@@ -93,7 +95,7 @@ public class ResourceController {
 		}
 	}
 	
-	@RequestMapping("/delete/{resId}")
+	@RequestMapping(value="/delete/{resId}",method=RequestMethod.POST)
 	@ResponseBody
 	public String delete(@PathVariable int resId){
 		try {

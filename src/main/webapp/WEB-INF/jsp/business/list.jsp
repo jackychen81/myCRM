@@ -127,7 +127,7 @@ tr.shown td.details-control{
 							"render" : function(data, type, row) {
 								var button;
 								button = '<a href="${pageContext.request.contextPath}/business/update/'+row.bid+'" class="update btn btn-xs btn-warning glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Edit"></a>&nbsp'
-									+'<button bid="'+row.bid+'" class="setRole btn btn-xs btn-default glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-target="#myModal" data-placement="top" title="Set Role"></button>&nbsp'
+									+'<button bid="'+row.bid+'" class="addService btn btn-xs btn-default glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-target="#myModal" data-placement="top" title="Add Service"></button>&nbsp'
 									+ '<button bid="'+row.bid+'" class="remove btn btn-xs btn-danger glyphicon glyphicon-trash" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Delete"></button>'
 								return button;
 							}
@@ -136,53 +136,32 @@ tr.shown td.details-control{
 				select : true
 			});
 		
-		//set Role
-		$('#myTable').on('click','.setRole',function(e){
+		//Add Service
+		/* $('#myTable').on('click','.addService',function(e){
 			e.preventDefault();
 			$('.modal-body div').remove();
 			userId = $(this).attr("userId");
 			$('#myModal').modal('toggle');
-			var col = null;
-			var line = Math.ceil(roles.length / 3);
 			var $rows = $("<div></div>");
-			var index = 0;
-			var $row;
-			for(var i=1;i<=line;i++){
-				$row = $("<div id='"+i+"'class='row'></div>")
-				for(var j=0;j<3 && index<roles.length;j++){
-					col = "<div class='col-md-4 checkbox' style='margin-top: 10px;'>"+
-							"<label>"+
-								"<input type='checkbox' value="+roles[index].rid+">"+roles[index].roleName
-							"</label>"+
-					 	  "</div>";
-					$row.append(col);
-					index++;
-				}
-				$rows.append($row);
-			}
 			$('.modal-body').append($rows);
-			$.get("${pageContext.request.contextPath}/admin/role/getRoles/"+userId,function(roles){
-				for(var i=0;i<roles.length;i++){
-					setDropDownList(roles[i].rid,$("input[type='checkbox']"));
-				}
-			});
-		});
+			$.get("${pageContext.request.contextPath}/admin/item/listAllItem",function(data){
+				console.log(data);
+			}); 
+		}); */
 		
-		$("#myModal .modal-body").on('click',"input[type='checkbox']",function(){
+		/* $("#myModal .modal-body").on('click',"input[type='checkbox']",function(){
 			var roleId = $(this).val();
 			var isChecked = $(this).is(':checked');
 			console.log(isChecked);
 			if(isChecked){
-				//console.log("y");
 				$.post("${pageContext.request.contextPath}/admin/role/addUserRole/"+userId+"/"+roleId,function(){
 				});
 			}else{
 				$.post("${pageContext.request.contextPath}/admin/role/deleteUserRole/"+userId+"/"+roleId,function(){
 				});
-				//console.log("n");
 			}
 			
-		});
+		}); */
 		
 		//打开关闭子表单
 		$('#myTable').on('click','.details-control',function(e){
