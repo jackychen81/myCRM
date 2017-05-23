@@ -1,0 +1,408 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Set List</title>
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/bootstrap/css/bootstrap.min.css">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/datatable/css/jquery.dataTables.css">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/editor/css/buttons.dataTables.min.css">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/editor/css/select.dataTables.min.css">
+<link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/editor/css/editor.dataTables.min.css">
+<link type="text/css" rel="stylesheet"	href="${pageContext.request.contextPath}/resources/j-confirm/css/jquery-confirm.css">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/resources/ztree/css/zTreeStyle.css">
+<style type="text/css">
+#controller{
+	border:1px solid yellow;
+	width: 25px;
+	height: 200px;
+	/* position: relative; */
+	float: left;
+	margin: 5px 5px 5px 2px;
+}
+
+#left-searcher{
+	margin:10px 30px 10px 20px;
+	width: 100px;
+}
+
+#right-searcher{
+	margin:10px 20px 10px 50px;
+	width: 100px;
+}
+#right{
+	margin:10px 20px 10px 20px;
+	/* border: 1px solid #eee; */
+	/* height: 130px; */
+	width:100px;
+	/* position: relative; */
+	float: left;
+}
+.controller{
+	margin-top:50px;
+	/* position: relative; */
+	float: left;
+
+}
+#left{
+	margin:10px 20px 10px;
+	/* border: 1px solid #eee; */
+	/* height: 130px; */
+	width:100px;
+	/* position: relative; */
+	float: left;
+}
+
+.jconfirm-content-pane {
+	height: auto;
+}
+
+.jconfirm-content{
+	height: auto;
+}
+
+</style>
+<script type="text/javascript" src="${pageContext.request.contextPath}/resources/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript"	src="${pageContext.request.contextPath}/resources/datatable/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript"	src="${pageContext.request.contextPath}/resources/j-confirm/js/jquery-confirm.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/resources/ztree/js/jquery.ztree.all.js"></script>
+<script type="text/javascript">
+/* var cityObj=null;
+var cityOffset=null; */
+var zTreeObj;
+var setting = {
+		data : {
+			simpleData : {
+				enable : true,
+				idKey : "itemId",
+				pIdKey : "itemPid",
+				rootPId : 0
+			},
+			key:{
+				url:"iurl"
+			}
+		},
+		check: {
+			enable: false
+		},
+		edit:{
+			enable: false
+		},
+		view: {
+			//addHoverDom: addHoverDom,
+			//removeHoverDom: removeHoverDom,
+		},
+		callback:{
+			//beforeRemove: zTreeBeforeRemove,
+			//onDblClick: zTreeOnDblClick,
+			//beforeEditName: zTreeBeforeEditName
+		}
+};
+	$(function() {
+		
+		$(".navbar-right li").each(function(i,e){
+			$(this).removeClass("active");
+		});
+		$("#admin").addClass("active");
+		
+		//var params = {"name":"search","value":[]};
+		var table = $("#myTable").DataTable(
+			{
+				"processing" : false, // 是否显示取数据时的那个等待提示
+				"serverSide" : true,//这个用来指明是通过服务端来取数据
+				"ajaxSource" : "${pageContext.request.contextPath}/admin/set/listByPage",//这个是请求的地址
+				"serverData" : retrieveData, // 获取客户端传的参数数据（起始页，页长，search参数等）->服务器端的处理函数
+				//dom : 'Bfrtip',
+				dom:'B<"new">rtip',
+				"order": [[ 1, "asc" ]],
+				"columns" : [
+				        {
+				        	"data":"setId","visible" : false,
+				        },
+						{
+							"data" : "name"
+						},
+						{
+							"data" : "price"
+						},
+						{
+							"data" : "startFrom"
+						},
+						{
+							"data" : "expireTo"
+						},
+						{
+							"data" : "iscoupon","render":function(data, type, row){
+								var iscoupon;
+								iscoupon = data==""||data==0?"-":"团购";
+								return iscoupon;
+							}
+						},
+						{
+							"data" : "status","render":function(data, type, row){
+								var status;
+								data =='1'? status = "Enable": status = "Disable";
+								return status;
+							}
+						},
+						{
+							"data" : null, "orderable":false,
+							"render" : function(data, type, row) {
+								var button;
+								button = '<a href="${pageContext.request.contextPath}/admin/set/update/'+row.setId+'" class="update btn btn-xs btn-warning glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Edit"></a>&nbsp'
+									+ '<button setId="'+row.setId+'" class="addService btn btn-xs btn-default glyphicon glyphicon-edit" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Add Service"></button>&nbsp'	
+									+ '<button setId="'+row.setId+'" class="remove btn btn-xs btn-danger glyphicon glyphicon-trash" data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Delete"></button>'
+								return button;
+							}
+						}
+				],
+				select : true
+			});
+		
+		
+		
+		//添加服务
+		$("#myTable").on('click','.addService',function(){
+			var id = $(this).attr("setId");
+			var _content = "<input id='citySel' type='text' readonly value='' style='width:120px;' onclick='showMenu();' />"+
+							"<div id='menuContent' class='menuContent' style='display:none;'>"+
+								"<ul id='treeDemo' class='ztree' style='margin-top:0; width:180px; height: 300px;'></ul>"+
+							"</div>";
+			$.confirm({
+				title:'Add Service',
+				type:'green',
+				content:_content,
+				buttons: {
+					 OK:{
+						 text:'OK',
+						 btnClass:'btn',
+						 action:function(){
+							 var data = null;
+							 $.ajax({
+								 url:"${pageContext.request.contextPath}/admin/set/addService/"+id,
+								 type:"POST",
+								 data: JSON.stringify(data),
+								 dateType:"json",
+								 contentType:"application/json;charset=UTF-8",
+								 success:function(flag){
+									 if(flag){
+											table.ajax.reload( null, false );
+											$.alert("Delete successfuly");
+										}
+								 },
+								 error:function(){
+									 $.alert("Delete failed");
+								 }
+							});
+						 }
+					 },
+					 cancel:{
+						 text:'Cancel',
+						 btnClass:'btn-red',  
+				     }
+				 	},
+				 	onContentReady:function(){
+				 		//cityObj = $("#citySel");
+						//cityOffset = $("#citySel").offset();
+						
+				 	}
+				});
+		});
+		
+		//删除
+		$("#myTable").on('click','.remove',function(){
+			var id = $(this).attr("setId");
+			console.log(id);
+			$.confirm({
+			title:'Delete account',
+			content: 'Are you sure to Delete it?',
+			icon: 'glyphicon glyphicon-exclamation-sign',
+			type:'red',
+			 buttons: {
+				 Delete:{
+					 text:'Delete',
+					 btnClass:'btn',
+					 action:function(){
+						 $.get("${pageContext.request.contextPath}/admin/set/delete/"+id,function(flag){
+								if(flag){
+									table.ajax.reload( null, false );
+									$.alert("Delete successfuly");
+								}else{
+									$.alert("Delete failed");
+								}
+						});
+					 }
+				 },
+				 cancel:{
+					 text:'Cancel',
+					 btnClass:'btn-red',  
+			     }
+			 	}
+			});
+		});
+		
+		 // Setup - add a text input to each footer cell
+	    /* $('#myTable tfoot th').each( function () {
+	        var title = $('#myTable thead th').eq( $(this).index() ).text();
+	        if(title!="Action"){
+	        	$(this).html( '<input type="text" style="width:100%" placeholder="'+title+'" />' );
+	        }
+	    } ); */
+		 
+	 	// Apply the search
+	  /*  table.columns().eq( 0 ).each( function ( colIdx ) {
+	        $( 'input', table.column( colIdx ).footer() ).on( 'change', function () {
+	        	params.value.length=0;
+	        	$( 'input[type="text"]').each(function(index){
+	        		if(this.value!=""){
+	        			params.value.push({"name":index,"value":this.value});
+	        		}
+	        	});
+	        	console.log(params.value);
+	            table.draw();
+	        } );
+	    } ); */
+		
+		//自定义按钮，然后回通过datatable的dom绑定到表单上
+		$("div.new").html('<a href="${pageContext.request.contextPath}/admin/set/add" id="new" class="dt-button" style="float:left">New</a>');
+		
+		
+		$('[data-toggle=tooltip]').tooltip();
+		
+		
+		
+		/* $("#new").on('click',function(){
+			window.location.href="${pageContext.request.contextPath}/admin/card/add";
+		}); */
+		
+		
+	});
+	function showMenu() {
+		//console.log(cityOffset.left);
+		var cityObj = $("#citySel");
+		var cityOffset = $("#citySel").offset();
+		$.ajax({
+			url:"${pageContext.request.contextPath}/admin/item/listAllItem",
+			async : false,
+			datatype:"json",
+			//contentType:"text/html; charset=UTF-8",
+			success:function(result){
+				//console.log(result);
+				zTreeObj = $.fn.zTree.init($("#treeDemo"),setting,result);
+				zTreeObj.expandAll(true);
+			},
+			error:function(){
+				$.alert("Date load error");
+			}
+			
+		});
+		$("#menuContent").css({left:cityOffset.left + "px", top:cityOffset.top + cityObj.outerHeight() + "px"}).slideDown("fast");
+
+		$("body").bind("mousedown", onBodyDown);
+	}
+	
+	function beforeClick(treeId, treeNode) {
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+		zTree.checkNode(treeNode, !treeNode.checked, null, true);
+		return false;
+	}
+	
+	function onCheck(e, treeId, treeNode) {
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+		nodes = zTree.getCheckedNodes(true),
+		v = "";
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var cityObj = $("#citySel");
+		cityObj.attr("value", v);
+	}
+	function hideMenu() {
+		$("#menuContent").fadeOut("fast");
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "menuBtn" || event.target.id == "citySel" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+			hideMenu();
+		}
+	}
+	function retrieveData(sSource111, aoData111, fnCallback111) {
+		$.ajax({
+			url : sSource111,//这个就是请求地址对应sAjaxSource
+			data : {
+				"aoData" : JSON.stringify(aoData111)
+			},//这个是把datatable的一些基本数据传给后台,比如起始位置,每页显示的行数
+			contentType : "application/x-www-form-urlencoded;charset=UTF-8",
+			type : 'get',
+			dataType : 'json',
+			async : false,
+			success : function(result) {
+				fnCallback111(result);//把返回的数据传给这个方法就可以了,datatable会自动绑定数据的
+				console.log(result.data);
+			},
+			error : function(msg) {
+				alert("error!");
+			}
+		});
+	}
+	
+</script>
+<body>
+</head>
+<body>
+	<jsp:include page="../../top.jsp"></jsp:include>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3 col-md-2 sidebar">
+				<ul class="nav nav-sidebar">
+					<li><a href="${pageContext.request.contextPath}/admin/user/list">Customer List</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin/role/list">Role List</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin/resource/list">Resource List</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin/card/list">Card List</a></li>
+					<li class="active"><a href="${pageContext.request.contextPath}/admin/Set/list">Set List</a></li>
+				</ul>
+				<hr>
+			</div>
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+				<h1 class="page-header">Set List</h1>
+				<div class="table-responsive">
+					<div>
+						<table class="display" id="myTable" width="100%">
+							<thead>
+								<tr>
+									<th>Id</th>
+									<th>Name</th>
+									<th>price</th>
+									<th>from</th>
+									<th>expire</th>
+									<th>coupon</th>
+									<th>status</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+							<tfoot>
+								<tr>
+									<th>Id</th>
+									<th>Name</th>
+									<th>price</th>
+									<th>from</th>
+									<th>expire</th>
+									<th>coupon</th>
+									<th>status</th>
+									<th>Action</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
